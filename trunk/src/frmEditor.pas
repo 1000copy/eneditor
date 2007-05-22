@@ -1,39 +1,4 @@
-{-------------------------------------------------------------------------------
-The contents of this file are subject to the Mozilla Public License
-Version 1.1 (the "License"); you may not use this file except in compliance
-with the License. You may obtain a copy of the License at
-http://www.mozilla.org/MPL/
-
-Software distributed under the License is distributed on an "AS IS" basis,
-WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
-the specific language governing rights and limitations under the License.
-
-The Original Code is: frmEditor.pas, released 2000-09-08.
-
-The Original Code is part of the EditAppDemos project, written by
-Michael Hieke for the SynEdit component suite.
-All Rights Reserved.
-
-Contributors to the SynEdit project are listed in the Contributors.txt file.
-
-Alternatively, the contents of this file may be used under the terms of the
-GNU General Public License Version 2 or later (the "GPL"), in which case
-the provisions of the GPL are applicable instead of those above.
-If you wish to allow use of your version of this file only under the terms
-of the GPL and not to allow others to use your version of this file
-under the MPL, indicate your decision by deleting the provisions above and
-replace them with the notice and other provisions required by the GPL.
-If you do not delete the provisions above, a recipient may use your version
-of this file under either the MPL or the GPL.
-
-$Id: frmEditor.pas,v 1.6 2004/11/10 13:03:12 maelh Exp $
-
-You may retrieve the latest version of this file at the SynEdit home page,
-located at http://SynEdit.SourceForge.net
-
-Known Issues:
--------------------------------------------------------------------------------}
-
+{lcjun 's something}
 unit frmEditor;
 
 {$I SynEdit.inc}
@@ -43,7 +8,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
   uEditAppIntfs, SynEdit, SynEditTypes, SynEditMiscProcs,
-  SynEditMiscClasses, SynEditSearch,ComCtrls ;
+  SynEditMiscClasses, SynEditSearch,ComCtrls ,uMRU,uEditorConf;
 
 type
   TEditorKind = (ekBorderless, ekInTabsheet, ekMDIChild);
@@ -152,6 +117,8 @@ type
     fUntitledNumber: integer;
     constructor Create(AForm: TEditorForm);
     procedure DoSetFileName(AFileName: string);
+    procedure SetFont(Font :TFont);overload ;
+    procedure SetFont(FontName : String;FontSize :Integer);overload ;
   end;
 const
   WM_DELETETHIS  =  WM_USER + 42;
@@ -165,13 +132,41 @@ type
   public
     property EditIntf : IEditor read FEditIntf ;
   end;
+{ TEditorFactory }
 
+type
+  TEditorFactory = class(TInterfacedObject, IEditorFactory)
+  private
+    fMRU : TadpMRU ;
+    fMRUFolders : TadpMRU ;
+    FEditorConf : IXMLEnEditorType ;
+    FFont : TFont ;
+    function CanCloseAll: boolean;
+    procedure CloseAll;
+    function CreateTabSheet(AOwner: TPageControl): IEditor;
+    function GetEditorCount: integer;
+    function GetEditor(Index: integer): IEditor;
+    procedure RemoveEditor(AEditor: IEditor);
+  private
+    fEditors: TInterfaceList;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    procedure CloseEditor ;
+    procedure SetFont(Font :TFont);overload;
+    procedure AddMRU(Filename : String);
+    procedure RemoveMRU(Filename : String);
+    function GetMRUCount:Integer;
+    function GetMRU (I:Integer): String;
+    procedure SetFont(FontName : String;FontSize :Integer);overload ;
+    function GetFont:TFont;
+  end;
   implementation
 
 {$R *.DFM}
 
 uses
-  dmCommands, dlgSearchText, dlgReplaceText, dlgConfirmReplace;
+  dmCommands, dlgSearchText, dlgReplaceText, dlgConfirmReplace, frmMain;
 
 
 var
@@ -229,7 +224,8 @@ end;
 procedure TEditor.Close;
 begin
   if (fFileName <> '') and (CommandsDataModule <> nil) then
-    CommandsDataModule.AddMRUEntry(fFileName);
+    //CommandsDataModule.AddMRUEntry(fFileName);
+    GI_EditorFactory.AddMRU(fFileName);
   if fUntitledNumber <> -1 then
     CommandsDataModule.ReleaseUntitledNumber(fUntitledNumber);
   if fForm <> nil then
@@ -459,6 +455,39 @@ begin
     fForm.ShowSearchReplaceDialog(TRUE);
 end;
 
+procedure TEditor.SetFont(Font: TFont);
+begin
+  fForm.SynEditor.Font.Assign(Font);
+end;
+
+procedure TEditorFactory.SetFont(FontName: String; FontSize: Integer);
+var
+  Font : TFont ;
+begin
+  Font := TFont.Create ;
+  try
+    Font.Name := FontName ;
+    Font.Size := FontSize ;
+    SetFont(Font);
+  finally
+    Font.Free ;
+  end;
+end;
+
+procedure TEditor.SetFont(FontName: String; FontSize: Integer);
+var
+  Font : TFont ;
+begin
+  Font := TFont.Create ;
+  try
+    Font.Name := FontName ;
+    Font.Size := FontSize ;
+    SetFont(Font);
+  finally
+    Font.Free ;
+  end;
+end;
+
 { TEditorTabSheet }
 
 
@@ -467,33 +496,31 @@ begin
   Free;
 end;
 
-{ TEditorFactory }
 
-type
-  TEditorFactory = class(TInterfacedObject, IEditorFactory)
-  private
-    function CanCloseAll: boolean;
-    procedure CloseAll;
-    function CreateTabSheet(AOwner: TPageControl): IEditor;
-    function GetEditorCount: integer;
-    function GetEditor(Index: integer): IEditor;
-    procedure RemoveEditor(AEditor: IEditor);
-  private
-    fEditors: TInterfaceList;
-    constructor Create;
-    destructor Destroy; override;
-  public
-    procedure CloseEditor ;
-  end;
-
+const
+  ConfFile = '.\enEditorConf.xml';
 constructor TEditorFactory.Create;
 begin
   inherited Create;
   fEditors := TInterfaceList.Create;
+  fMRU := TadpMRU.Create(nil) ;
+  fMRU.ParentMenuItem := MainForm.mRecentFiles ;
+  fMRu.OnClick := MainForm.OnOpenMRUFile ;
+  fMRU.RegistryPath:='\software\lcjun\enEditor\mru';
+  fMRUFolders := TadpMRU.Create(nil) ;
+  fMRUFolders.ParentMenuItem := MainForm.mRecentFolders ;
+  fMRUFolders.OnClick := MainForm.OnOpenMRUFile ;
+  fMRUFolders.RegistryPath:='\software\lcjun\enEditor\mruFolders';
+  FEditorConf := LoadenEditor(ConfFile);
+  FFont := TFont.Create ;
+  FFont.Name := FEditorConf.Font.Name ;
+  FFont.Size := FEditorConf.Font.Size ;
 end;
 
 destructor TEditorFactory.Destroy;
 begin
+  FFont.Free ;
+  fMRU.free ;
   fEditors.Free;
   inherited Destroy;
 end;
@@ -548,6 +575,7 @@ begin
       AOwner.ActivePage := Sheet;
       LForm.SetFocus;
       GI_ActiveEditor := fEditor ;
+      fEditor.SetFont(FEditorConf.Font.Name,FEditorConf.Font.Size);
     end;
     // fix for Delphi 4 (???)
     LForm.Realign;
@@ -915,9 +943,44 @@ end;
 
 
 
-initialization
-  GI_EditorFactory := TEditorFactory.Create;
-finalization
-  GI_EditorFactory := nil;
+procedure TEditorFactory.SetFont(Font: TFont);
+var
+ i : Integer ;
+ Editor : IEditor ;
+begin
+  for I := 0 to GetEditorCount -1 do begin
+    Editor := GetEditor(I) ;
+    Editor.SetFont(Font);
+  end;
+  FEditorConf.Font.Name := Font.Name ;
+  FEditorConf.Font.Size := Font.Size  ;
+  FEditorConf.OwnerDocument.SaveToFile (ConfFile);
+end;
+
+procedure TEditorFactory.AddMRU(Filename: String);
+begin
+  fMRU.AddItem(FileName);
+end;
+
+function TEditorFactory.GetMRUCount: Integer;
+begin
+  Result := fMRU.Count ;
+end;
+
+procedure TEditorFactory.RemoveMRU(Filename: String);
+begin
+  fMRU.RemoveItem(FileName);
+end;
+
+function TEditorFactory.GetMRU (I:Integer): String;
+begin
+  Result := fMRU.GetItem(I);
+end;
+
+function TEditorFactory.GetFont: TFont;
+begin
+  Result := FFont ;
+end;
+
 end.
 

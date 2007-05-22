@@ -45,7 +45,9 @@ uses
   dlgConfirmReplace in 'dlgConfirmReplace.pas' {ConfirmReplaceDialog},
   dlgReplaceText in 'dlgReplaceText.pas',
   dlgSearchText in 'dlgSearchText.pas' {TextSearchDialog},
-  uHighlighterProcs in 'uHighlighterProcs.pas';
+  uHighlighterProcs in 'uHighlighterProcs.pas',
+  uMRU in 'uMRU.pas',
+  uEditorConf in 'uEditorConf.pas';
 
 {$R *.RES}
 

@@ -1,38 +1,3 @@
-{-------------------------------------------------------------------------------
-The contents of this file are subject to the Mozilla Public License
-Version 1.1 (the "License"); you may not use this file except in compliance
-with the License. You may obtain a copy of the License at
-http://www.mozilla.org/MPL/
-
-Software distributed under the License is distributed on an "AS IS" basis,
-WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
-the specific language governing rights and limitations under the License.
-
-The Original Code is: dmCommands.pas, released 2000-09-08.
-
-The Original Code is part of the EditAppDemos project, written by
-Michael Hieke for the SynEdit component suite.
-All Rights Reserved.
-
-Contributors to the SynEdit project are listed in the Contributors.txt file.
-
-Alternatively, the contents of this file may be used under the terms of the
-GNU General Public License Version 2 or later (the "GPL"), in which case
-the provisions of the GPL are applicable instead of those above.
-If you wish to allow use of your version of this file only under the terms
-of the GPL and not to allow others to use your version of this file
-under the MPL, indicate your decision by deleting the provisions above and
-replace them with the notice and other provisions required by the GPL.
-If you do not delete the provisions above, a recipient may use your version
-of this file under either the MPL or the GPL.
-
-$Id: dmCommands.pas,v 1.2 2000/11/22 08:34:13 mghie Exp $
-
-You may retrieve the latest version of this file at the SynEdit home page,
-located at http://SynEdit.SourceForge.net
-
-Known Issues:
--------------------------------------------------------------------------------}
 
 unit dmCommands;
 
@@ -43,7 +8,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ActnList, SynHighlighterSQL, SynHighlighterPas, SynEditHighlighter,
-  SynHighlighterCpp, SynHighlighterXML, SynHighlighterHtml;
+  SynHighlighterCpp, SynHighlighterXML, SynHighlighterHtml,uMRU;
 
 type
   TCommandsDataModule = class(TDataModule)
@@ -102,18 +67,13 @@ type
     procedure actSearchReplaceUpdate(Sender: TObject);
   private
     fHighlighters: TStringList;
-    fMRUFiles: TStringList;
     fUntitledNumbers: TBits;
   public
-    procedure AddMRUEntry(AFileName: string);
     function GetHighlighterForFile(AFileName: string): TSynCustomHighlighter;
-    function GetMRUEntries: integer;
-    function GetMRUEntry(Index: integer): string;
     function GetSaveFileName(var ANewName: string;
       AHighlighter: TSynCustomHighlighter): boolean;
     function GetUntitledNumber: integer;
     procedure ReleaseUntitledNumber(ANumber: integer);
-    procedure RemoveMRUEntry(AFileName: string);
   end;
 
 var
@@ -124,10 +84,8 @@ implementation
 {$R *.DFM}
 
 uses
-  uHighlighterProcs, uEditAppIntfs;
+  uHighlighterProcs, uEditAppIntfs, frmMain;
 
-const
-  MAX_MRU = 5;
 
 resourcestring
   SFilterAllFiles = 'Txt file|*.txt|All files|*.*|';
@@ -139,28 +97,18 @@ begin
   fHighlighters := TStringList.Create;
   GetHighlighters(Self, fHighlighters, FALSE);
   dlgFileOpen.Filter := SFilterAllFiles +GetHighlightersFilter(fHighlighters) ;
-  fMRUFiles := TStringList.Create;
+  //fMRUFiles := TStringList.Create;
 end;
 
 procedure TCommandsDataModule.DataModuleDestroy(Sender: TObject);
 begin
-  fMRUFiles.Free;
+  //fMRUFiles.Free;
   fHighlighters.Free;
   fUntitledNumbers.Free;
   CommandsDataModule := nil;
 end;
 
 // implementation
-
-procedure TCommandsDataModule.AddMRUEntry(AFileName: string);
-begin
-  if AFileName <> '' then begin
-    RemoveMRUEntry(AFileName);
-    fMRUFiles.Insert(0, AFileName);
-    while fMRUFiles.Count > MAX_MRU do
-      fMRUFiles.Delete(fMRUFiles.Count - 1);
-  end;
-end;
 
 function TCommandsDataModule.GetHighlighterForFile(
   AFileName: string): TSynCustomHighlighter;
@@ -170,20 +118,6 @@ begin
   else
     Result := nil;
 end;
-
-function TCommandsDataModule.GetMRUEntries: integer;
-begin
-  Result := fMRUFiles.Count;
-end;
-
-function TCommandsDataModule.GetMRUEntry(Index: integer): string;
-begin
-  if (Index >= 0) and (Index < fMRUFiles.Count) then
-    Result := fMRUFiles[Index]
-  else
-    Result := '';
-end;
-
 function TCommandsDataModule.GetSaveFileName(var ANewName: string;
   AHighlighter: TSynCustomHighlighter): boolean;
 begin
@@ -227,15 +161,6 @@ begin
     fUntitledNumbers[ANumber] := FALSE;
 end;
 
-procedure TCommandsDataModule.RemoveMRUEntry(AFileName: string);
-var
-  i: integer;
-begin
-  for i := fMRUFiles.Count - 1 downto 0 do begin
-    if CompareText(AFileName, fMRUFiles[i]) = 0 then
-      fMRUFiles.Delete(i);
-  end;
-end;
 
 procedure TCommandsDataModule.actFileSaveExecute(Sender: TObject);
 begin
