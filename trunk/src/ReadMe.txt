@@ -1,8 +1,18 @@
 
-体会isf博客看的发大水发到
-===============
-中国人们的武装力量 
-===============
+--------------2007年5月22日--------------
+TODO: 
+  1. Refactor 
+     replace menu item File-Close with Windows-close and remove the last .
+     DoOpenFile implementation code should be placed inside IEditorFactory
+  2. Run Command 
+     can run any  command with parameters
+     can trap output of the command
+
+
+TIPS : Now I have release source code of the eneditor into codehosting provided by google (http://code.google.com/p/eneditor)
+  
+TIPS : A man concerned Remobjects like me ,(http://code.google.com/p/kmframework/),so  He may be a intersting person :) 
+    
 --------------2007年3月31日--------------
   工具选择：
   Editplus ,Mathon ,DelphiGreen ,SqlserverGreen
