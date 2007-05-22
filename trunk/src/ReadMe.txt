@@ -1,5 +1,5 @@
 
---------------2007年5月22日--------------
+--------------May 22, 2007 --------------
 TODO: 
   1. Refactor 
      replace menu item File-Close with Windows-close and remove the last .
@@ -11,7 +11,10 @@ TODO:
 
 TIPS : Now I have release source code of the eneditor into codehosting provided by google (http://code.google.com/p/eneditor)
   
-TIPS : A man concerned Remobjects like me ,(http://code.google.com/p/kmframework/),so  He may be a intersting person :) 
+TIPS : A man concerned Remobjects like me ,(http://code.google.com/p/kmframework/),so  He may be a intersting person :)
+TIPS :If I want to use English instead of Chinese to write diaries, Google Translator can help me.
+      (如果我想用英语而不是汉语来写日记,谷歌译者可以帮助我).
+       http://www.google.com/translate_t?langpair=zh|en 
     
 --------------2007年3月31日--------------
   工具选择：
