@@ -72,13 +72,12 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure pctrlMainChange(Sender: TObject);
     procedure miViewFontClick(Sender: TObject);
-    procedure OnOpenMRUFolders(Sender: TObject; const FileName: String);
+    procedure OnOpenMRUFolders(Sender: TObject; const AFileName: String);
   private
   protected
     function CanCloseAll: boolean;
     function CmdLineOpenFiles(AMultipleFiles: boolean): boolean;
-    function DoCreateEditor(AFileName: string): IEditor; virtual;
-    procedure DoOpenFile(AFileName: string);
+    //procedure DoOpenFile(AFileName: string);
   end;
 var
   MainForm : TMainForm ;
@@ -97,18 +96,17 @@ begin
   CommandsDataModule := TCommandsDataModule.Create(Self);
   CmdLineOpenFiles(TRUE);
   if Self.pctrlMain.ActivePage = nil then
-   DoCreateEditor('');
+   GI_EditorFactory.DoOpenFile('',Self.pctrlMain);
   Left := 100 ;Top :=100 ;Height := 600 ;Width  := 800 ;
   //GI_EditorFactory.SetFont(FEditorConf.Font.Name,FEditorConf.Font.size);
 end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
-  if GI_EditorFactory <> nil then
-    GI_EditorFactory.CloseAll;
-  CommandsDataModule.Free;
+  Assert(GI_EditorFactory <> nil );
+  GI_EditorFactory.CloseAll;
   GI_EditorFactory := nil ;
-
+  CommandsDataModule.Free; 
 end;
 
 // implementation
@@ -127,44 +125,12 @@ begin
     if not AMultipleFiles and (Cnt > 1) then
       Cnt := 1;
     for i := 1 to Cnt do
-      DoOpenFile(ParamStr(i));
+      GI_EditorFactory.DoOpenFile(ParamStr(i),Self.pctrlMain);
+
     Result := TRUE;
   end else
     Result := FALSE;
 end;
-
-function TMainForm.DoCreateEditor(AFileName: string): IEditor;
-begin
-  if GI_EditorFactory <> nil then
-    Result := GI_EditorFactory.CreateTabSheet(pctrlMain)
-  else
-    Result := nil;
-end;
-
-procedure TMainForm.DoOpenFile(AFileName: string);
-var
-  i: integer;
-  LEditor: IEditor;
-begin
-  AFileName := ExpandFileName(AFileName);
-  if AFileName <> '' then begin
-    GI_EditorFactory.RemoveMRU(AFileName);
-    // activate the editor if already open
-    Assert(GI_EditorFactory <> nil);
-    for i := GI_EditorFactory.GetEditorCount - 1 downto 0 do begin
-      LEditor := GI_EditorFactory.Editor[i];
-      if CompareText(LEditor.GetFileName, AFileName) = 0 then begin
-        LEditor.Activate;
-        exit;
-      end;
-    end;
-  end;
-  // create a new editor, add it to the editor list, open the file
-  LEditor := DoCreateEditor(AFileName);
-  if LEditor <> nil then
-    LEditor.OpenFile(AFileName);
-end;
-
 
 // action handler methods
 
@@ -175,14 +141,14 @@ end;
 
 procedure TMainForm.actFileNewExecute(Sender: TObject);
 begin
-  DoOpenFile('');
+  GI_EditorFactory.DoOpenFile('',Self.pctrlMain);
 end;
 
 procedure TMainForm.actFileOpenExecute(Sender: TObject);
 begin
   with CommandsDataModule.dlgFileOpen do begin
     if Execute then
-      DoOpenFile(FileName);
+      GI_EditorFactory.DoOpenFile(FileName,self.pctrlMain);
   end;
 end;
 
@@ -225,16 +191,19 @@ var
   i: integer;
   s: string;
 begin
-  DoOpenFile(FileName);
+  GI_EditorFactory.DoOpenFile(FileName,self.pctrlMain);
 end;
 
-procedure TMainForm.OnOpenMRUFolders(Sender: TObject; const FileName: String);
+procedure TMainForm.OnOpenMRUFolders(Sender: TObject; const AFileName: String);
 var
   i: integer;
   s: string;
 begin
-
-  DoOpenFile(FileName);
+  with CommandsDataModule.dlgFileOpen do begin
+    CommandsDataModule.dlgFileOpen.InitialDir := AFileName ;
+    if Execute then
+      GI_EditorFactory.DoOpenFile(FileName,self.pctrlMain);
+  end;
 end;
 
 procedure TMainForm.actUpdateStatusBarPanelsUpdate(Sender: TObject);
@@ -271,9 +240,8 @@ end;
 
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  if GI_EditorFactory <> nil then
-    CanClose := GI_EditorFactory.CanCloseAll;
-
+  Assert(GI_EditorFactory <> nil );
+  CanClose := GI_EditorFactory.CanCloseAll;
 end;
 
 procedure TMainForm.pctrlMainChange(Sender: TObject);
@@ -286,7 +254,6 @@ begin
   FontDialog1.Font.Assign(GI_EditorFactory.GetFont);
   if FontDialog1.Execute then begin
     GI_EditorFactory.SetFont(FontDialog1.Font);
-
   end;
 end;
 

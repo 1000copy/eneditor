@@ -141,6 +141,7 @@ type
     fMRUFolders : TadpMRU ;
     FEditorConf : IXMLEnEditorType ;
     FFont : TFont ;
+    FPageControl : TPageControl ;
     function CanCloseAll: boolean;
     procedure CloseAll;
     function CreateTabSheet(AOwner: TPageControl): IEditor;
@@ -160,6 +161,7 @@ type
     function GetMRU (I:Integer): String;
     procedure SetFont(FontName : String;FontSize :Integer);overload ;
     function GetFont:TFont;
+    procedure DoOpenFile(AFileName: string;pctrlMain:TPageControl);
   end;
   implementation
 
@@ -509,7 +511,7 @@ begin
   fMRU.RegistryPath:='\software\lcjun\enEditor\mru';
   fMRUFolders := TadpMRU.Create(nil) ;
   fMRUFolders.ParentMenuItem := MainForm.mRecentFolders ;
-  fMRUFolders.OnClick := MainForm.OnOpenMRUFile ;
+  fMRUFolders.OnClick := MainForm.OnOpenMRUFolders ;
   fMRUFolders.RegistryPath:='\software\lcjun\enEditor\mruFolders';
   FEditorConf := LoadenEditor(ConfFile);
   FFont := TFont.Create ;
@@ -521,6 +523,7 @@ destructor TEditorFactory.Destroy;
 begin
   FFont.Free ;
   fMRU.free ;
+  fMRUFolders.Free ;
   fEditors.Free;
   inherited Destroy;
 end;
@@ -938,7 +941,6 @@ begin
     if  GI_ActiveEditor <> nil then
       GI_ActiveEditor.Activate ;
   end;
-
 end;
 
 
@@ -960,6 +962,7 @@ end;
 procedure TEditorFactory.AddMRU(Filename: String);
 begin
   fMRU.AddItem(FileName);
+  fMRUFolders.AddItem(ExtractFilePath(FileName));
 end;
 
 function TEditorFactory.GetMRUCount: Integer;
@@ -980,6 +983,31 @@ end;
 function TEditorFactory.GetFont: TFont;
 begin
   Result := FFont ;
+end;
+
+procedure TEditorFactory.DoOpenFile(AFileName: string;pctrlMain:TPageControl);
+var
+  i: integer;
+  LEditor: IEditor;
+begin
+  FPageControl :=  pctrlMain ;
+  AFileName := ExpandFileName(AFileName);
+  if AFileName <> '' then begin
+    GI_EditorFactory.RemoveMRU(AFileName);
+    // activate the editor if already open
+    Assert(GI_EditorFactory <> nil);
+    for i := GI_EditorFactory.GetEditorCount - 1 downto 0 do begin
+      LEditor := GI_EditorFactory.Editor[i];
+      if CompareText(LEditor.GetFileName, AFileName) = 0 then begin
+        LEditor.Activate;
+        exit;
+      end;
+    end;
+  end;
+  if GI_EditorFactory <> nil then begin
+    LEditor := GI_EditorFactory.CreateTabSheet(pctrlMain);
+    LEditor.OpenFile(AFileName);
+  end
 end;
 
 end.

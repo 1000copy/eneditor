@@ -197,8 +197,14 @@ end;
 
 procedure TCommandsDataModule.actFileCloseExecute(Sender: TObject);
 begin
+  {
   if GI_FileCmds <> nil then
     GI_FileCmds.ExecClose;
+  }
+  Gi_EditorFactory.CloseEditor;
+  if self.pctrlMain.ActivePage = nil then
+    Close ;
+
 end;
 
 procedure TCommandsDataModule.actFileCloseUpdate(Sender: TObject);
