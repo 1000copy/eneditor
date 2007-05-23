@@ -202,8 +202,8 @@ begin
     GI_FileCmds.ExecClose;
   }
   Gi_EditorFactory.CloseEditor;
-  if self.pctrlMain.ActivePage = nil then
-    Close ;
+  if MainForm.pctrlMain.ActivePage = nil then
+    MainForm.Close ;
 
 end;
 
@@ -337,4 +337,3 @@ end;
 
 end.
 
- 
