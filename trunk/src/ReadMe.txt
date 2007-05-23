@@ -1,10 +1,19 @@
-
+--------------May 23, 2007 --------------
+TASK 
+  3. Refactor : Move dmCommands.ActionList to MainForm
+  4. Refactor : IEditorFactory so complex ! Remove the functions from it 
+    procedure AddMRU(Filename : String);
+    procedure RemoveMRU(Filename : String);
+    function GetMRUCount:Integer;
+    function GetMRU (I:Integer): String; 
+  5. Refactor : Merge IEdit.Close to IEditFactory.CloseEditor(FileName:String);  
 --------------May 22, 2007 --------------
-TODO: 
-  1. Refactor 
-     replace menu item File-Close with Windows-close and remove the last .
+TASK
+  1. DONE on May 23,2007 
+     Refactor :replace menu item File-Close with Windows-close and remove the last .
      DoOpenFile implementation code should be placed inside IEditorFactory
-  2. Run Command 
+  2. 
+     Run Command 
      can run any  command with parameters
      can trap output of the command
 
@@ -40,5 +49,6 @@ TIPS :If I want to use English instead of Chinese to write diaries, Google Trans
   参数：E:\setup\docutils-snapshot\docutils\tools\rst2html.py $(Filename).$(Ext) $(Filename).html
   路径：$(dir)
 --------------2007年3月31日--------------
-使用rst重新编写了 使用P4D "使用P4D 编写Python Extension ",不但是可以生产html，最重要的是，理解了”为什么都是文本文件，别人写的就比较容易阅读，而我的比较乱？“
+使用rst重新编写了 使用P4D "使用P4D 编写Python Extension ",不但是可以生产html，
+最重要的是，理解了”为什么都是文本文件，别人写的就比较容易阅读，而我的比较乱？“
 

@@ -49,8 +49,6 @@ type
     actUpdateStatusBarPanels: TAction;
     actFileCloseAll: TAction;
     miFileCloseAll: TMenuItem;
-    Window2: TMenuItem;
-    Close2: TMenuItem;
     pctrlMain: TPageControl;
     FontDialog1: TFontDialog;
     miViewFont: TMenuItem;
@@ -58,7 +56,6 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure mFileClick(Sender: TObject);
-    procedure actFileNewOrOpenUpdate(Sender: TObject);
     procedure actFileNewExecute(Sender: TObject);
     procedure actFileOpenExecute(Sender: TObject);
     procedure actFileExitExecute(Sender: TObject);
@@ -67,7 +64,6 @@ type
     procedure OnOpenMRUFile(Sender: TObject; const FileName: String);
     procedure actUpdateStatusBarPanelsUpdate(Sender: TObject);
     procedure actFileCloseAllExecute(Sender: TObject);
-    procedure actFileCloseAllUpdate(Sender: TObject);
     procedure Close2Click(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure pctrlMainChange(Sender: TObject);
@@ -106,7 +102,7 @@ begin
   Assert(GI_EditorFactory <> nil );
   GI_EditorFactory.CloseAll;
   GI_EditorFactory := nil ;
-  CommandsDataModule.Free; 
+  CommandsDataModule.Free;
 end;
 
 // implementation
@@ -134,10 +130,6 @@ end;
 
 // action handler methods
 
-procedure TMainForm.actFileNewOrOpenUpdate(Sender: TObject);
-begin
-  (Sender as TAction).Enabled := GI_EditorFactory <> nil;
-end;
 
 procedure TMainForm.actFileNewExecute(Sender: TObject);
 begin
@@ -160,11 +152,7 @@ begin
   end;
 end;
 
-procedure TMainForm.actFileCloseAllUpdate(Sender: TObject);
-begin
-  actFileCloseAll.Enabled := (GI_EditorFactory <> nil)
-    and (GI_EditorFactory.GetEditorCount > 0);
-end;
+
 
 procedure TMainForm.actFileExitExecute(Sender: TObject);
 begin

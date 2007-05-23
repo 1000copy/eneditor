@@ -26,7 +26,6 @@ type
   IEditorFactory = interface
     function CanCloseAll: boolean;
     procedure CloseAll;
-    function CreateTabSheet(AOwner: TPageControl): IEditor;
     function GetEditorCount: integer;
     function GetEditor(Index: integer): IEditor;
     procedure RemoveEditor(AEditor: IEditor);
@@ -35,11 +34,11 @@ type
     function GetFont:TFont;
     procedure SetFont(Font :TFont);overload ;
     procedure SetFont(FontName : String;FontSize :Integer);overload ;
+    procedure DoOpenFile(AFileName: string;pctrlMain:TPageControl);
     procedure AddMRU(Filename : String);
     procedure RemoveMRU(Filename : String);
     function GetMRUCount:Integer;
-    function GetMRU (I:Integer): String;
-    procedure DoOpenFile(AFileName: string;pctrlMain:TPageControl);
+    function GetMRU (I:Integer): String; 
   end;
 
   IEditCommands = interface
