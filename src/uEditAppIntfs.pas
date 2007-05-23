@@ -39,6 +39,7 @@ type
     procedure RemoveMRU(Filename : String);
     function GetMRUCount:Integer;
     function GetMRU (I:Integer): String;
+    procedure DoOpenFile(AFileName: string;pctrlMain:TPageControl);
   end;
 
   IEditCommands = interface
