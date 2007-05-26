@@ -41,7 +41,7 @@ uses
   frmMain in 'frmMain.pas' {MainForm},
   uEditAppIntfs in 'uEditAppIntfs.pas',
   frmEditor in 'frmEditor.pas' {EditorForm},
-  dmCommands in 'dmCommands.pas' {CommandsDataModule: TDataModule},
+  uHighlighters in 'uHighlighters.pas' {CommandsDataModule: TDataModule},
   dlgConfirmReplace in 'dlgConfirmReplace.pas' {ConfirmReplaceDialog},
   dlgReplaceText in 'dlgReplaceText.pas',
   dlgSearchText in 'dlgSearchText.pas' {TextSearchDialog},

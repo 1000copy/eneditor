@@ -1,12 +1,14 @@
 --------------May 23, 2007 --------------
 TASK 
   3. Refactor : Move dmCommands.ActionList to MainForm
-  4. Refactor : IEditorFactory so complex ! Remove the functions from it 
+  4. DONE @May 25,2007 
+    Refactor : IEditorFactory so complex ! Remove the functions from it 
     procedure AddMRU(Filename : String);
     procedure RemoveMRU(Filename : String);
     function GetMRUCount:Integer;
     function GetMRU (I:Integer): String; 
-  5. Refactor : Merge IEdit.Close to IEditFactory.CloseEditor(FileName:String);  
+  5. DONE @May 25,2007 
+     Refactor : Merge IEdit.Close to IEditFactory.CloseEditor(FileName:String);  
 --------------May 22, 2007 --------------
 TASK
   1. DONE on May 23,2007 

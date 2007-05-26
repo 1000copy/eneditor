@@ -21,6 +21,7 @@ type
     function GetModified: boolean;
     procedure OpenFile(AFileName: string);
     procedure SetFont(Font :TFont);overload ;
+    function  GetUntitledNumber : Integer ;
   end;
 
   IEditorFactory = interface
@@ -35,10 +36,9 @@ type
     procedure SetFont(Font :TFont);overload ;
     procedure SetFont(FontName : String;FontSize :Integer);overload ;
     procedure DoOpenFile(AFileName: string;pctrlMain:TPageControl);
-    procedure AddMRU(Filename : String);
-    procedure RemoveMRU(Filename : String);
-    function GetMRUCount:Integer;
-    function GetMRU (I:Integer): String; 
+    function GetUntitledNumber: integer;
+    procedure ReleaseUntitledNumber(ANumber: integer);
+    procedure AskEnable ;
   end;
 
   IEditCommands = interface

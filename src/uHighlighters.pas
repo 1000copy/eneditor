@@ -1,5 +1,5 @@
 
-unit dmCommands;
+unit uHighlighters;
 
 {$I SynEdit.inc}
 
@@ -36,7 +36,7 @@ uses
 
 { TCommandsDataModule }
 
-constructor Highlighters.Create;
+constructor THighlighters.Create;
 begin
   inherited Create(nil);
   SynPasSyn1 := TSynPasSyn.Create(Self);
@@ -51,20 +51,19 @@ end;
 // implementation
 
 
-destructor Highlighters.Destroy;
+destructor THighlighters.Destroy;
 begin
   fHighlighters.Free;
-  CommandsDataModule := nil;
 
   inherited;
 end;
 
-function Highlighters.GetFilters: String;
+function THighlighters.GetFilters: String;
 begin
   Result := 'Txt file|*.txt|All files|*.*|Pas|*.pas|sql|*.sql|xml|*.xml'
 end;
 
-function Highlighters.GetHighlighterForFile(
+function THighlighters.GetHighlighterForFile(
   AFileName: string): TSynCustomHighlighter;
 begin
   if AFileName <> '' then
