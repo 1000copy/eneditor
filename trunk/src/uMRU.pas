@@ -4,7 +4,7 @@ unit uMRU;
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Menus, Registry;
+  Windows, Messages, SysUtils, Classes, Menus, Registry,ActnList;
 
 type
 
@@ -19,16 +19,18 @@ type
     FRegistryPath: string;
     FParentMenuItem: TMenuItem;
     FOnClick: TMRUClickEvent;
+    FAction: TAction;
     procedure SetMaxItems(const Value: cardinal);
     procedure SetShowFullPath(const Value: boolean);
     procedure SetRegistryPath(const Value: string);
     procedure SetParentMenuItem(const Value: TMenuItem);
-
+    procedure DoUpdateEvent(Sender: TObject);
     procedure LoadMRU;
     procedure SaveMRU;
     procedure ItemsChange(Sender: TObject);
     procedure ClearParentMenu;
     function GetMRUCount: Integer;
+    procedure SetAction(const Value: TAction);
   protected
     procedure Loaded; override;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
@@ -48,7 +50,9 @@ type
     property Count : Integer read GetMRUCount  ;
     function GetItem (I : Integer): String ;
     property OnClick: TMRUClickEvent read FOnClick write FOnClick;
+    procedure AskEnable ;
   end;
+
 
 procedure Register;
 
@@ -281,6 +285,23 @@ end;
 function TadpMRU.GetItem(I: Integer): String;
 begin
   Result := FItems.Strings[I];
+end;
+
+
+procedure TadpMRU.DoUpdateEvent(Sender: TObject);
+begin
+  Self.ParentMenuItem.Enabled := Count >0 ;
+end;
+
+procedure TadpMRU.SetAction(const Value: TAction);
+begin
+  FAction := Value;
+  FAction.OnUpdate :=  DoUpdateEvent ;
+end;
+
+procedure TadpMRU.AskEnable;
+begin
+  Self.ParentMenuItem.Enabled := Count > 0 ;
 end;
 
 end. (*adpMRU.pas*)

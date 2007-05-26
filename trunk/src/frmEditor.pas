@@ -8,7 +8,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
   uEditAppIntfs, SynEdit, SynEditTypes, SynEditMiscProcs,
-  SynEditMiscClasses, SynEditSearch,ComCtrls ,uMRU,uEditorConf;
+  SynEditMiscClasses, SynEditSearch,ComCtrls ,uMRU,uEditorConf,uHighlighters;
 
 type
   TEditorKind = (ekBorderless, ekInTabsheet, ekMDIChild);
@@ -119,6 +119,7 @@ type
     procedure DoSetFileName(AFileName: string);
     procedure SetFont(Font :TFont);overload ;
     procedure SetFont(FontName : String;FontSize :Integer);overload ;
+    function  GetUntitledNumber : Integer ;
   end;
 const
   WM_DELETETHIS  =  WM_USER + 42;
@@ -148,8 +149,11 @@ type
     function GetEditorCount: integer;
     function GetEditor(Index: integer): IEditor;
     procedure RemoveEditor(AEditor: IEditor);
+    function GetUntitledNumber: integer;
+    procedure ReleaseUntitledNumber(ANumber: integer);
   private
     fEditors: TInterfaceList;
+    fUntitledNumbers: TBits;
   public
     constructor Create;
     destructor Destroy; override;
@@ -157,18 +161,18 @@ type
     procedure SetFont(Font :TFont);overload;
     procedure AddMRU(Filename : String);
     procedure RemoveMRU(Filename : String);
-    function GetMRUCount:Integer;
     function GetMRU (I:Integer): String;
     procedure SetFont(FontName : String;FontSize :Integer);overload ;
     function GetFont:TFont;
     procedure DoOpenFile(AFileName: string;pctrlMain:TPageControl);
+    procedure AskEnable ;
   end;
   implementation
 
 {$R *.DFM}
 
 uses
-  dmCommands, dlgSearchText, dlgReplaceText, dlgConfirmReplace, frmMain;
+   dlgSearchText, dlgReplaceText, dlgConfirmReplace, frmMain;
 
 
 var
@@ -225,11 +229,6 @@ end;
 
 procedure TEditor.Close;
 begin
-  if (fFileName <> '') and (CommandsDataModule <> nil) then
-    //CommandsDataModule.AddMRUEntry(fFileName);
-    GI_EditorFactory.AddMRU(fFileName);
-  if fUntitledNumber <> -1 then
-    CommandsDataModule.ReleaseUntitledNumber(fUntitledNumber);
   if fForm <> nil then
     fForm.Close;
 end;
@@ -239,7 +238,7 @@ begin
   if AFileName <> fFileName then begin
     fFileName := AFileName;
     if fUntitledNumber <> -1 then begin
-      CommandsDataModule.ReleaseUntitledNumber(fUntitledNumber);
+      GI_EditorFactory.ReleaseUntitledNumber(fUntitledNumber);
       fUntitledNumber := -1;
     end;
   end;
@@ -276,8 +275,6 @@ begin
   if fFileName <> '' then
     Result := ExtractFileName(fFileName)
   else begin
-    if fUntitledNumber = -1 then
-      fUntitledNumber := CommandsDataModule.GetUntitledNumber;
     Result := SNonameFileTitle + IntToStr(fUntitledNumber);
   end;
 end;
@@ -292,12 +289,15 @@ end;
 
 procedure TEditor.OpenFile(AFileName: string);
 begin
+
   fFileName := AFileName;
   if fForm <> nil then begin
     if (AFileName <> '') and FileExists(AFileName) then
       fForm.SynEditor.Lines.LoadFromFile(AFileName)
     else
       fForm.SynEditor.Lines.Clear;
+    if fUntitledNumber = -1 then
+      fUntitledNumber := GI_EditorFactory.GetUntitledNumber;
     fForm.DoUpdateCaption;
     fForm.DoUpdateHighlighter;
   end;
@@ -490,6 +490,11 @@ begin
   end;
 end;
 
+function TEditor.GetUntitledNumber: Integer;
+begin
+  Result := Self.fUntitledNumber ;
+end;
+
 { TEditorTabSheet }
 
 
@@ -509,10 +514,12 @@ begin
   fMRU.ParentMenuItem := MainForm.mRecentFiles ;
   fMRu.OnClick := MainForm.OnOpenMRUFile ;
   fMRU.RegistryPath:='\software\lcjun\enEditor\mru';
+
   fMRUFolders := TadpMRU.Create(nil) ;
   fMRUFolders.ParentMenuItem := MainForm.mRecentFolders ;
   fMRUFolders.OnClick := MainForm.OnOpenMRUFolders ;
   fMRUFolders.RegistryPath:='\software\lcjun\enEditor\mruFolders';
+
   FEditorConf := LoadenEditor(ConfFile);
   FFont := TFont.Create ;
   FFont.Name := FEditorConf.Font.Name ;
@@ -806,7 +813,7 @@ var
 begin
   Assert(fEditor <> nil);
   NewName := fEditor.fFileName;
-  if CommandsDataModule.GetSaveFileName(NewName, SynEditor.Highlighter) then
+  if MainForm.GetSaveFileName(NewName, SynEditor.Highlighter) then
   begin
     fEditor.DoSetFileName(NewName);
     DoUpdateCaption;
@@ -867,7 +874,7 @@ procedure TEditorForm.DoUpdateHighlighter;
 begin
   Assert(fEditor <> nil);
   if fEditor.fFileName <> '' then begin
-    SynEditor.Highlighter := CommandsDataModule.GetHighlighterForFile(
+    SynEditor.Highlighter := Highlighters.GetHighlighterForFile(
       fEditor.fFileName);
   end else
     SynEditor.Highlighter := nil;
@@ -928,11 +935,19 @@ end;
 
 procedure TEditorFactory.CloseEditor ;
 var
-  i : Integer;
+  fUntitledNumber,i : Integer;
+  FileName : String;
 begin
   I := fEditors.IndexOf(GI_ActiveEditor);
   if I <> -1 then begin
-    //RemoveEditor(FActiveEditor);在formdestroy中已经做了这个工作
+    FileName := GI_ActiveEditor.GetFileName ;
+    if (FileName <> '') then
+        AddMRU(FileName)
+    else begin
+      fUntitledNumber := GI_ActiveEditor.GetUntitledNumber ;
+      if fUntitledNumber <> -1 then
+        ReleaseUntitledNumber(fUntitledNumber);
+    end;
     GI_ActiveEditor.Close;
     if I > 0 then
       GI_ActiveEditor := GetEditor(I -1 )
@@ -965,10 +980,7 @@ begin
   fMRUFolders.AddItem(ExtractFilePath(FileName));
 end;
 
-function TEditorFactory.GetMRUCount: Integer;
-begin
-  Result := fMRU.Count ;
-end;
+
 
 procedure TEditorFactory.RemoveMRU(Filename: String);
 begin
@@ -990,12 +1002,12 @@ var
   i: integer;
   LEditor: IEditor;
 begin
+  Assert(GI_EditorFactory <> nil);
   FPageControl :=  pctrlMain ;
   AFileName := ExpandFileName(AFileName);
   if AFileName <> '' then begin
-    GI_EditorFactory.RemoveMRU(AFileName);
+    RemoveMRU(AFileName);
     // activate the editor if already open
-    Assert(GI_EditorFactory <> nil);
     for i := GI_EditorFactory.GetEditorCount - 1 downto 0 do begin
       LEditor := GI_EditorFactory.Editor[i];
       if CompareText(LEditor.GetFileName, AFileName) = 0 then begin
@@ -1004,10 +1016,36 @@ begin
       end;
     end;
   end;
-  if GI_EditorFactory <> nil then begin
-    LEditor := GI_EditorFactory.CreateTabSheet(pctrlMain);
-    LEditor.OpenFile(AFileName);
-  end
+  LEditor := CreateTabSheet(pctrlMain);
+  LEditor.OpenFile(AFileName);
+end;
+
+function TEditorFactory.GetUntitledNumber: integer;
+begin
+  if fUntitledNumbers = nil then
+    fUntitledNumbers := TBits.Create;
+  Result := fUntitledNumbers.OpenBit;
+  if Result = fUntitledNumbers.Size then
+    fUntitledNumbers.Size := fUntitledNumbers.Size + 32;
+  fUntitledNumbers[Result] := TRUE;
+  Inc(Result);
+end;
+
+procedure TEditorFactory.ReleaseUntitledNumber(ANumber: integer);
+begin
+  Dec(ANumber);
+  if (fUntitledNumbers <> nil) and (ANumber >= 0)
+    and (ANumber < fUntitledNumbers.Size)
+  then
+    fUntitledNumbers[ANumber] := FALSE;
+end;
+
+
+
+procedure TEditorFactory.AskEnable;
+begin
+  fMRU.AskEnable ;
+  fMRUFolders.AskEnable ;
 end;
 
 end.
