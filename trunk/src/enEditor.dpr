@@ -47,7 +47,8 @@ uses
   dlgSearchText in 'dlgSearchText.pas' {TextSearchDialog},
   uHighlighterProcs in 'uHighlighterProcs.pas',
   uMRU in 'uMRU.pas',
-  uEditorConf in 'uEditorConf.pas';
+  uEditorConf in 'uEditorConf.pas',
+  uAction in 'uAction.pas';
 
 {$R *.RES}
 

@@ -7,7 +7,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
-  uEditAppIntfs, SynEdit, SynEditTypes, SynEditMiscProcs,
+  uEditAppIntfs, SynEdit, SynEditTypes, SynEditMiscProcs,uAction,ActnList,
   SynEditMiscClasses, SynEditSearch,ComCtrls ,uMRU,uEditorConf,uHighlighters;
 
 type
@@ -151,6 +151,9 @@ type
     procedure RemoveEditor(AEditor: IEditor);
     function GetUntitledNumber: integer;
     procedure ReleaseUntitledNumber(ANumber: integer);
+    procedure InitMenu;
+    procedure OnOpenMRUFile(Sender: TObject; const FileName: String);
+    procedure OnOpenMRUFolders(Sender: TObject; const AFileName: String);
   private
     fEditors: TInterfaceList;
     fUntitledNumbers: TBits;
@@ -506,18 +509,38 @@ end;
 
 const
   ConfFile = '.\enEditorConf.xml';
+procedure TEditorFactory.OnOpenMRUFile(Sender: TObject; const FileName: String);
+var
+  i: integer;
+  s: string;
+begin
+  GI_EditorFactory.DoOpenFile(FileName,MainForm.pctrlMain);
+end;
+
+procedure TEditorFactory.OnOpenMRUFolders(Sender: TObject; const AFileName: String);
+var
+  i: integer;
+  s: string;
+begin
+  with MainForm.dlgFileOpen do begin
+      MainForm.dlgFileOpen.InitialDir := AFileName ;
+    if Execute then
+      GI_EditorFactory.DoOpenFile(FileName,MainForm.pctrlMain);
+  end;
+end;
 constructor TEditorFactory.Create;
 begin
   inherited Create;
+  InitMenu ;
   fEditors := TInterfaceList.Create;
   fMRU := TadpMRU.Create(nil) ;
   fMRU.ParentMenuItem := MainForm.mRecentFiles ;
-  fMRu.OnClick := MainForm.OnOpenMRUFile ;
+  fMRu.OnClick := OnOpenMRUFile ;
   fMRU.RegistryPath:='\software\lcjun\enEditor\mru';
 
   fMRUFolders := TadpMRU.Create(nil) ;
   fMRUFolders.ParentMenuItem := MainForm.mRecentFolders ;
-  fMRUFolders.OnClick := MainForm.OnOpenMRUFolders ;
+  fMRUFolders.OnClick := OnOpenMRUFolders ;
   fMRUFolders.RegistryPath:='\software\lcjun\enEditor\mruFolders';
 
   FEditorConf := LoadenEditor(ConfFile);
@@ -526,6 +549,48 @@ begin
   FFont.Size := FEditorConf.Font.Size ;
 end;
 
+procedure TEditorFactory.InitMenu;
+var
+  mFile,mi : TMenuItem ;
+  acFile ,ac: TAction ;
+  MainMenu : TMainMenu ;
+begin
+  acFile := TacFile.Create(MainForm) ;
+  MainMenu := TMainMenu.Create(MainForm) ;
+  mFile := TMenuItem.Create(MainMenu) ;
+  // File Menu
+  mFile.Action := acFile ;
+  MainMenu.Items.add(mFile);
+
+  mi := TMenuItem.Create(MainMenu) ;
+  mFile.add(mi);
+  mi.Action := TacFileNew.Create(MainForm) ;
+  {
+  mi := TMenuItem.Create(MainMenu) ;
+  mFile.add(mi);
+  mi.Action := actFileOpen ;
+
+  mi := TMenuItem.Create(MainMenu) ;
+  mFile.add(mi);
+  mi.Action := Self.actRecentFiles ;
+  mRecentFiles := mi ;
+
+  mi := TMenuItem.Create(MainMenu) ;
+  mFile.add(mi);
+  mi.Action := Self.actRecentFolders ;
+  mRecentFolders := mi ;
+  
+  // Edit Menu
+  mEdit := TMenuItem.Create(MainMenu) ;
+  mEdit.Caption := 'Edit';
+  MainMenu.Items.add(mEdit);
+  // View Menu
+  mView := TMenuItem.Create(MainMenu) ;
+  mView.Caption := 'View';
+  MainMenu.Items.add(mView);
+  }
+  MainForm.Menu := MainMenu ;
+end;
 destructor TEditorFactory.Destroy;
 begin
   FFont.Free ;

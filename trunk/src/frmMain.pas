@@ -7,7 +7,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  Menus, ActnList, uEditAppIntfs, ComCtrls,uMRU,SynEditHighlighter,uHighlighterProcs;
+  Menus, ActnList, uEditAppIntfs, ComCtrls,uMRU,SynEditHighlighter,uHighlighterProcs,uAction;
 
 type
   TMainForm = class(TForm)
@@ -73,6 +73,7 @@ type
     actSearchReplace: TAction;
     dlgFileSave: TSaveDialog;
     dlgFileOpen: TOpenDialog;
+    actFile: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure actFileNewExecute(Sender: TObject);
@@ -80,21 +81,21 @@ type
     procedure actFileExitExecute(Sender: TObject);
     procedure actViewStatusbarUpdate(Sender: TObject);
     procedure actViewStatusbarExecute(Sender: TObject);
-    procedure OnOpenMRUFile(Sender: TObject; const FileName: String);
     procedure actUpdateStatusBarPanelsUpdate(Sender: TObject);
     procedure actFileCloseAllExecute(Sender: TObject);
     procedure Close2Click(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure pctrlMainChange(Sender: TObject);
     procedure miViewFontClick(Sender: TObject);
-    procedure OnOpenMRUFolders(Sender: TObject; const AFileName: String);
-    procedure mFileClick(Sender: TObject);
+    procedure actlStandardExecute(Action: TBasicAction;
+      var Handled: Boolean);
+    procedure actFileExecute(Sender: TObject);
   public
     function GetSaveFileName(var ANewName: string;
       AHighlighter: TSynCustomHighlighter): boolean;
 
   published
-    procedure actEditCopyExecute(Sender: TObject);
+    procedure aca(Sender: TObject);
     procedure actEditCopyUpdate(Sender: TObject);
     procedure actEditCutExecute(Sender: TObject);
     procedure actEditCutUpdate(Sender: TObject);
@@ -128,7 +129,10 @@ type
   protected
     function CanCloseAll: boolean;
     function CmdLineOpenFiles(AMultipleFiles: boolean): boolean;
-    //procedure DoOpenFile(AFileName: string);
+  private
+    MainMenu : TMainMenu ;
+    acFile : TacFile ;
+  public
   end;
 var
   MainForm : TMainForm ;
@@ -143,6 +147,7 @@ uses
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
+  //InitMenu ;
   GI_EditorFactory := TEditorFactory.Create;
   Highlighters := THighlighters.Create;
   dlgFileOpen.Filter :=  Highlighters.GetFilters ;
@@ -226,25 +231,7 @@ begin
   StatusBar.Visible := not StatusBar.Visible;
 end;
 
-procedure TMainForm.OnOpenMRUFile(Sender: TObject; const FileName: String);
-var
-  i: integer;
-  s: string;
-begin
-  GI_EditorFactory.DoOpenFile(FileName,self.pctrlMain);
-end;
 
-procedure TMainForm.OnOpenMRUFolders(Sender: TObject; const AFileName: String);
-var
-  i: integer;
-  s: string;
-begin
-  with dlgFileOpen do begin
-      dlgFileOpen.InitialDir := AFileName ;
-    if Execute then
-      GI_EditorFactory.DoOpenFile(FileName,self.pctrlMain);
-  end;
-end;
 
 procedure TMainForm.actUpdateStatusBarPanelsUpdate(Sender: TObject);
 resourcestring
@@ -298,11 +285,6 @@ begin
 end;
 
 
-procedure TMainForm.mFileClick(Sender: TObject);
-begin
-  GI_EditorFactory.AskEnable ;
-end;
-
 procedure TMainForm.actFileSaveExecute(Sender: TObject);
 begin
     GI_FileCmds.ExecSave;
@@ -355,7 +337,7 @@ begin
   actEditCut.Enabled := GI_EditCmds.CanCut;
 end;
 
-procedure TMainForm.actEditCopyExecute(Sender: TObject);
+procedure TMainForm.aca(Sender: TObject);
 begin
   GI_EditCmds.ExecCopy;
 end;
@@ -477,5 +459,17 @@ begin
       Result := FALSE;
   end;
 end;
+
+procedure TMainForm.actlStandardExecute(Action: TBasicAction;
+  var Handled: Boolean);
+begin
+    GI_EditorFactory.AskEnable ;
+end;
+
+procedure TMainForm.actFileExecute(Sender: TObject);
+begin
+    GI_EditorFactory.AskEnable ;
+end;
+
 end.
 
