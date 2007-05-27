@@ -1,6 +1,9 @@
---------------May 23, 2007 --------------
-TASK 
-  3. Refactor : Move dmCommands.ActionList to MainForm
+
+--------------May 27, 2007 --------------
+
+--------------May 23, 2007 -------------- 
+  3. DONE @May 27,2007   
+    Refactor : Move dmCommands.ActionList to MainForm
   4. DONE @May 25,2007 
     Refactor : IEditorFactory so complex ! Remove the functions from it 
     procedure AddMRU(Filename : String);
@@ -19,7 +22,7 @@ TASK
      can run any  command with parameters
      can trap output of the command
 
-
+--------------May 22, 2007 --------------
 TIPS : Now I have release source code of the eneditor into codehosting provided by google (http://code.google.com/p/eneditor)
   
 TIPS : A man concerned Remobjects like me ,(http://code.google.com/p/kmframework/),so  He may be a intersting person :)

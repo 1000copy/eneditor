@@ -581,13 +581,13 @@ end;
 procedure TacEditPaste.Execute(Sender: TObject);
 begin
   inherited;
-
+  GI_EditCmds.ExecPaste ;
 end;
 
 procedure TacEditPaste.Update(Sender: TObject);
 begin
   inherited;
-
+  Enabled := GI_EditCmds.CanPaste ;
 end;
 
 { TacEditDelete }
