@@ -2,7 +2,7 @@ unit uAction;
 
 interface
 uses
-  ActnList ,Classes,uEditAppIntfs,Menus,Dialogs,Forms,Windows;
+  SysUtils ,ActnList ,Classes,uEditAppIntfs,Menus,Dialogs,Forms,Windows;
 type
   TacBase = class(TAction)
   protected
@@ -179,7 +179,28 @@ type
   public
     constructor Create(Owner : TComponent);override;
   end;
-
+  TacViewStatusBar =class(TacBase)
+  protected
+    procedure Update(Sender: TObject);override ;
+    procedure Execute(Sender: TObject);override ;
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+  TacViewFont =class(TacBase)
+  FontDialog1 : TFontDialog ;
+  protected
+    procedure Update(Sender: TObject);override ;
+    procedure Execute(Sender: TObject);override ;
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+  TacOnlyUpdate =class(TacBase)
+  protected
+    procedure Update(Sender: TObject);override ;
+    procedure Execute(Sender: TObject);override ;
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
 
 
 implementation
@@ -367,6 +388,7 @@ constructor TacFileClose.Create(Owner: TComponent);
 begin
   inherited;
   Caption := 'Close';
+  ShortCut := Menus.ShortCut(Word('W'),[ssCtrl]);
 end;
 
 procedure TacFileClose.Execute(Sender: TObject);
@@ -473,13 +495,13 @@ end;
 procedure TacEditRedo.Execute(Sender: TObject);
 begin
   inherited;
-
+  GI_EditCmds.ExecRedo ;
 end;
 
 procedure TacEditRedo.Update(Sender: TObject);
 begin
   inherited;
-
+  Enabled := GI_EditCmds.CanRedo ;
 end;
 
 { TacEditFindPrevious }
@@ -494,13 +516,13 @@ end;
 procedure TacEditFindPrevious.Execute(Sender: TObject);
 begin
   inherited;
-
+  GI_SearchCmds.ExecFindPrev ;
 end;
 
 procedure TacEditFindPrevious.Update(Sender: TObject);
 begin
   inherited;
-
+  Enabled := GI_SearchCmds.CanFindPrev ;
 end;
 
 { TacEditCut }
@@ -508,20 +530,20 @@ end;
 constructor TacEditCut.Create(Owner: TComponent);
 begin
   inherited;
-
+  Caption :='Cut';
+  ShortCut := Menus.ShortCut(Word('X'),[ssCtrl]);
 end;
 
 procedure TacEditCut.Execute(Sender: TObject);
 begin
   inherited;
-
+  GI_EditCmds.ExecCut ;
 end;
 
 procedure TacEditCut.Update(Sender: TObject);
 begin
   inherited;
-  Caption :='Cut';
-  ShortCut := Menus.ShortCut(Word('X'),[ssCtrl]);
+  Enabled := GI_EditCmds.CanCut ;
 end;
 
 { TacEditCopy }
@@ -537,13 +559,13 @@ end;
 procedure TacEditCopy.Execute(Sender: TObject);
 begin
   inherited;
-
+  GI_EditCmds.ExecCopy ;
 end;
 
 procedure TacEditCopy.Update(Sender: TObject);
 begin
   inherited;
-
+  Enabled := GI_EditCmds.CanCopy ;
 end;
 
 { TacEditPaste }
@@ -638,19 +660,19 @@ end;
 constructor TacEditReplace.Create(Owner: TComponent);
 begin
   inherited;
-
+  Caption := 'Replace...';
 end;
 
 procedure TacEditReplace.Execute(Sender: TObject);
 begin
   inherited;
-
+   GI_SearchCmds.ExecReplace;
 end;
 
 procedure TacEditReplace.Update(Sender: TObject);
 begin
   inherited;
-
+   Enabled := GI_SearchCmds.CanReplace ;
 end;
 
 { TacEditFindNext }
@@ -659,19 +681,105 @@ constructor TacEditFindNext.Create(Owner: TComponent);
 begin
   inherited;
   Caption :='Find Next';
-  ShortCut := Menus.ShortCut(VK_F3,[ssShift]);
+  ShortCut := Menus.ShortCut(VK_F3,[]);
 end;
 
 procedure TacEditFindNext.Execute(Sender: TObject);
 begin
   inherited;
-
+  GI_SearchCmds.ExecFindNext ;
 end;
 
 procedure TacEditFindNext.Update(Sender: TObject);
 begin
   inherited;
+  Enabled := GI_SearchCmds.CanFindNext ;
+end;
 
+{ TacViewFont }
+
+constructor TacViewFont.Create(Owner: TComponent);
+begin
+  inherited;
+  Caption := 'Font';
+  FontDialog1 := TFontDialog.Create(Self);
+end;
+
+procedure TacViewFont.Execute(Sender: TObject);
+begin
+  inherited;
+  FontDialog1.Font.Assign(GI_EditorFactory.GetFont);
+  if FontDialog1.Execute then begin
+    GI_EditorFactory.SetFont(FontDialog1.Font);
+  end;
+end;
+
+procedure TacViewFont.Update(Sender: TObject);
+begin
+  inherited;
+
+end;
+
+{ TacViewStatusBar }
+
+constructor TacViewStatusBar.Create(Owner: TComponent);
+begin
+  inherited;
+  Caption := 'Status Bar';
+end;
+
+procedure TacViewStatusBar.Execute(Sender: TObject);
+begin
+  inherited;
+  MainForm.StatusBar.Visible := not MainForm.StatusBar.Visible;
+end;
+
+procedure TacViewStatusBar.Update(Sender: TObject);
+begin
+  inherited;
+  Checked := MainForm.StatusBar.Visible;
+end;
+
+{ TacOnlyUpdate }
+
+constructor TacOnlyUpdate.Create(Owner: TComponent);
+begin
+  inherited;
+
+end;
+
+procedure TacOnlyUpdate.Execute(Sender: TObject);
+begin
+  inherited;
+
+end;
+
+procedure TacOnlyUpdate.Update(Sender: TObject);
+resourcestring
+  SModified = 'Modified';
+var
+  ptCaret: TPoint;
+begin
+  inherited;
+  with MainForm do begin
+    //actUpdateStatusBarPanels.Enabled := TRUE;
+    if GI_ActiveEditor <> nil then begin
+      ptCaret := GI_ActiveEditor.GetCaretPos;
+      if (ptCaret.X > 0) and (ptCaret.Y > 0) then
+        StatusBar.Panels[0].Text := Format(' %6d:%3d ', [ptCaret.Y, ptCaret.X])
+      else
+        StatusBar.Panels[0].Text := '';
+      if GI_ActiveEditor.GetModified then
+        StatusBar.Panels[1].Text := SModified
+      else
+        StatusBar.Panels[1].Text := '';
+      StatusBar.Panels[2].Text := GI_ActiveEditor.GetEditorState;
+    end else begin
+      StatusBar.Panels[0].Text := '';
+      StatusBar.Panels[1].Text := '';
+      StatusBar.Panels[2].Text := '';
+    end;
+  end;
 end;
 
 end.
