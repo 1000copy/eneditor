@@ -157,6 +157,7 @@ type
   private
     fEditors: TInterfaceList;
     fUntitledNumbers: TBits;
+    mRecentFiles,mRecentFolders : TMenuItem ;
   public
     constructor Create;
     destructor Destroy; override;
@@ -531,17 +532,17 @@ end;
 constructor TEditorFactory.Create;
 begin
   inherited Create;
-  InitMenu ;
   fEditors := TInterfaceList.Create;
   fMRU := TadpMRU.Create(nil) ;
-  fMRU.ParentMenuItem := MainForm.mRecentFiles ;
+//  fMRU.ParentMenuItem := mRecentFiles ;
   fMRu.OnClick := OnOpenMRUFile ;
   fMRU.RegistryPath:='\software\lcjun\enEditor\mru';
 
   fMRUFolders := TadpMRU.Create(nil) ;
-  fMRUFolders.ParentMenuItem := MainForm.mRecentFolders ;
+//  fMRUFolders.ParentMenuItem := mRecentFolders ;
   fMRUFolders.OnClick := OnOpenMRUFolders ;
   fMRUFolders.RegistryPath:='\software\lcjun\enEditor\mruFolders';
+  InitMenu ;
 
   FEditorConf := LoadenEditor(ConfFile);
   FFont := TFont.Create ;
@@ -551,44 +552,90 @@ end;
 
 procedure TEditorFactory.InitMenu;
 var
-  mFile,mi : TMenuItem ;
+  mFile,mView,mEdit,mi : TMenuItem ;
   acFile ,ac: TAction ;
   MainMenu : TMainMenu ;
-begin
+begin 
   acFile := TacFile.Create(MainForm) ;
   MainMenu := TMainMenu.Create(MainForm) ;
   mFile := TMenuItem.Create(MainMenu) ;
   // File Menu
   mFile.Action := acFile ;
   MainMenu.Items.add(mFile);
-
+  // New
   mi := TMenuItem.Create(MainMenu) ;
   mFile.add(mi);
   mi.Action := TacFileNew.Create(MainForm) ;
-  {
+  // Open
   mi := TMenuItem.Create(MainMenu) ;
   mFile.add(mi);
-  mi.Action := actFileOpen ;
-
+  mi.Action := TacFileOpen.Create(MainForm) ;
+  // Recent Files
   mi := TMenuItem.Create(MainMenu) ;
   mFile.add(mi);
-  mi.Action := Self.actRecentFiles ;
-  mRecentFiles := mi ;
-
+  mi.Action :=  TacFileRecentFiles.Create(MainForm) ;
+  fMRU.ParentMenuItem := mi ;
+  // Recent Folders
   mi := TMenuItem.Create(MainMenu) ;
   mFile.add(mi);
-  mi.Action := Self.actRecentFolders ;
-  mRecentFolders := mi ;
-  
+  mi.Action := TacFileRecentFolders.Create(MainForm) ;
+  fMRUFolders.ParentMenuItem := mi ;
+  // -
+  mi := TMenuItem.Create(MainMenu) ;
+  mFile.add(mi);
+  mi.Caption := '-';
+  // Save
+  mi := TMenuItem.Create(MainMenu) ;
+  mFile.add(mi);
+  mi.Action := TacFileSave.Create(MainForm) ;
+  // Save as
+  mi := TMenuItem.Create(MainMenu) ;
+  mFile.add(mi);
+  mi.Action := TacFileSaveAs.Create(MainForm) ;
+  // Close
+  mi := TMenuItem.Create(MainMenu) ;
+  mFile.add(mi);
+  mi.Action := TacFileClose.Create(MainForm) ;
+  // Close All
+  mi := TMenuItem.Create(MainMenu) ;
+  mFile.add(mi);
+  mi.Action := TacFileCloseAll.Create(MainForm) ;
+  // -
+  mi := TMenuItem.Create(MainMenu) ;
+  mFile.add(mi);
+  mi.Caption := '-';
+  // Print
+  mi := TMenuItem.Create(MainMenu) ;
+  mFile.add(mi);
+  mi.Action := TacFilePrint.Create(MainForm) ;
+  // -
+  mi := TMenuItem.Create(MainMenu) ;
+  mFile.add(mi);
+  mi.Caption := '-';
+  // Exit
+  mi := TMenuItem.Create(MainMenu) ;
+  mFile.add(mi);
+  mi.Action := TacFileExit.Create(MainForm) ;
   // Edit Menu
   mEdit := TMenuItem.Create(MainMenu) ;
   mEdit.Caption := 'Edit';
   MainMenu.Items.add(mEdit);
+  // Undo
+  mi := TMenuItem.Create(MainMenu) ;
+  mEdit.add(mi);
+  mi.Action := TacEditUndo.Create(MainForm) ;
+  // Redo
+  mi := TMenuItem.Create(MainMenu) ;
+  mEdit.add(mi);
+  mi.Action := TacEditRedo.Create(MainForm) ;
+  // -
+  mi := TMenuItem.Create(MainMenu) ;
+  mEdit.add(mi);
+  mi.Caption :='-' ;
   // View Menu
   mView := TMenuItem.Create(MainMenu) ;
   mView.Caption := 'View';
   MainMenu.Items.add(mView);
-  }
   MainForm.Menu := MainMenu ;
 end;
 destructor TEditorFactory.Destroy;
@@ -1020,6 +1067,8 @@ begin
       GI_ActiveEditor := GetEditor(I);
     if  GI_ActiveEditor <> nil then
       GI_ActiveEditor.Activate ;
+    if MainForm.pctrlMain.ActivePage = nil then
+      MainForm.Close ;
   end;
 end;
 

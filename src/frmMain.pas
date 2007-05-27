@@ -83,7 +83,6 @@ type
     procedure actViewStatusbarExecute(Sender: TObject);
     procedure actUpdateStatusBarPanelsUpdate(Sender: TObject);
     procedure actFileCloseAllExecute(Sender: TObject);
-    procedure Close2Click(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure pctrlMainChange(Sender: TObject);
     procedure miViewFontClick(Sender: TObject);
@@ -256,13 +255,6 @@ begin
     StatusBar.Panels[1].Text := '';
     StatusBar.Panels[2].Text := '';
   end;
-end;
-
-procedure TMainForm.Close2Click(Sender: TObject);
-begin
-  Gi_EditorFactory.CloseEditor;
-  if self.pctrlMain.ActivePage = nil then
-    Close ;
 end;
 
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
