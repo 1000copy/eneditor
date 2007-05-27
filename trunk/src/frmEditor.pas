@@ -8,7 +8,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
   uEditAppIntfs, SynEdit, SynEditTypes, SynEditMiscProcs,uAction,ActnList,
-  SynEditMiscClasses, SynEditSearch,ComCtrls ,uMRU,uEditorConf,uHighlighters;
+  SynEditMiscClasses, SynEditSearch,ComCtrls ,uMRU,uEditorConf,uHighlighters,
+  Dialogs,SynEditHighlighter;
 
 type
   TEditorKind = (ekBorderless, ekInTabsheet, ekMDIChild);
@@ -154,10 +155,14 @@ type
     procedure InitMenu;
     procedure OnOpenMRUFile(Sender: TObject; const FileName: String);
     procedure OnOpenMRUFolders(Sender: TObject; const AFileName: String);
+    function GetSaveFileName(var ANewName: string;
+      AHighlighter: TSynCustomHighlighter): boolean;
   private
     fEditors: TInterfaceList;
     fUntitledNumbers: TBits;
     mRecentFiles,mRecentFolders : TMenuItem ;
+    dlgFileOpen : TOpenDialog ;
+    dlgFileSave : TSaveDialog ;
   public
     constructor Create;
     destructor Destroy; override;
@@ -523,8 +528,8 @@ var
   i: integer;
   s: string;
 begin
-  with MainForm.dlgFileOpen do begin
-      MainForm.dlgFileOpen.InitialDir := AFileName ;
+  with dlgFileOpen do begin
+      dlgFileOpen.InitialDir := AFileName ;
     if Execute then
       GI_EditorFactory.DoOpenFile(FileName,MainForm.pctrlMain);
   end;
@@ -548,11 +553,36 @@ begin
   FFont := TFont.Create ;
   FFont.Name := FEditorConf.Font.Name ;
   FFont.Size := FEditorConf.Font.Size ;
-end;
+  Highlighters := THighlighters.Create;
+  dlgFileOpen :=TOpenDialog.Create(nil);
+  dlgFileOpen.Filter :=  Highlighters.GetFilters ;
 
+end;
+function TEditorFactory.GetSaveFileName(var ANewName: string;
+  AHighlighter: TSynCustomHighlighter): boolean;
+begin
+  with dlgFileSave do begin
+    if ANewName <> '' then begin
+      InitialDir := ExtractFileDir(ANewName);
+      FileName := ExtractFileName(ANewName);
+    end else begin
+      InitialDir := '';
+      FileName := '';
+    end;
+    if AHighlighter <> nil then
+      Filter := AHighlighter.DefaultFilter
+    else
+      Filter := Highlighters.GetFilters;
+    if Execute then begin
+      ANewName := FileName;
+      Result := TRUE;
+    end else
+      Result := FALSE;
+  end;
+end;
 procedure TEditorFactory.InitMenu;
 var
-  mFile,mView,mEdit,mi : TMenuItem ;
+  mHelp,mFile,mView,mEdit,mi : TMenuItem ;
   acFile ,ac: TAction ;
   MainMenu : TMainMenu ;
 begin 
@@ -632,14 +662,70 @@ begin
   mi := TMenuItem.Create(MainMenu) ;
   mEdit.add(mi);
   mi.Caption :='-' ;
+  // Cut
+  mi := TMenuItem.Create(MainMenu) ;
+  mEdit.add(mi);
+  mi.Action := TacEditCut.Create(MainForm) ;
+  // Copy
+  mi := TMenuItem.Create(MainMenu) ;
+  mEdit.add(mi);
+  mi.Action := TacEditCopy.Create(MainForm) ;
+  // Paste
+  mi := TMenuItem.Create(MainMenu) ;
+  mEdit.add(mi);
+  mi.Action := TacEditPaste.Create(MainForm) ;
+  // Delete
+  mi := TMenuItem.Create(MainMenu) ;
+  mEdit.add(mi);
+  mi.Action := TacEditDelete.Create(MainForm) ;
+  // Select all
+  mi := TMenuItem.Create(MainMenu) ;
+  mEdit.add(mi);
+  mi.Action := TacEditSelectAll.Create(MainForm) ;
+  // -
+  mi := TMenuItem.Create(MainMenu) ;
+  mEdit.add(mi);
+  mi.Caption := '-' ;
+  // Find
+  mi := TMenuItem.Create(MainMenu) ;
+  mEdit.add(mi);
+  mi.Action := TacEditFind.Create(MainForm) ;
+  // Findnext
+  mi := TMenuItem.Create(MainMenu) ;
+  mEdit.add(mi);
+  mi.Action := TacEditFindNext.Create(MainForm) ;
+  // Find Prev
+  mi := TMenuItem.Create(MainMenu) ;
+  mEdit.add(mi);
+  mi.Action := TacEditFindPrevious.Create(MainForm) ;
+  // Replace
+  mi := TMenuItem.Create(MainMenu) ;
+  mEdit.add(mi);
+  mi.Action := TacEditReplace.Create(MainForm) ;
   // View Menu
   mView := TMenuItem.Create(MainMenu) ;
   mView.Caption := 'View';
   MainMenu.Items.add(mView);
+  // Font
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewFont.Create(MainForm) ;
+  // StatusBar
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewStatusBar.Create(MainForm) ;
+  // Associate MainMenu
+  // Edit Menu
+  mHelp := TMenuItem.Create(MainMenu) ;
+  mHelp.Action := TacOnlyUpdate.Create(MainForm) ;
+  MainMenu.Items.add(mHelp);
   MainForm.Menu := MainMenu ;
+
+
 end;
 destructor TEditorFactory.Destroy;
 begin
+  dlgFileOpen.Free;
   FFont.Free ;
   fMRU.free ;
   fMRUFolders.Free ;
@@ -852,6 +938,7 @@ begin
     PCtrl := Sheet.PageControl;
     if PCtrl <> nil then
       PCtrl.ActivePage := Sheet;
+    SetFocus;
   end;
 end;
 
@@ -925,7 +1012,7 @@ var
 begin
   Assert(fEditor <> nil);
   NewName := fEditor.fFileName;
-  if MainForm.GetSaveFileName(NewName, SynEditor.Highlighter) then
+  if GI_EditorFactory.GetSaveFileName(NewName, SynEditor.Highlighter) then
   begin
     fEditor.DoSetFileName(NewName);
     DoUpdateCaption;
