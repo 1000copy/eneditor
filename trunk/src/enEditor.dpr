@@ -47,14 +47,18 @@ uses
   dlgSearchText in 'dlgSearchText.pas' {TextSearchDialog},
   uHighlighterProcs in 'uHighlighterProcs.pas',
   uMRU in 'uMRU.pas',
+  uAction in 'uAction.pas',
+  fuTools in 'fuTools.pas' {fmTools},
   uEditorConf in 'uEditorConf.pas',
-  uAction in 'uAction.pas';
+  OKCANCL2 in 'C:\Program Files\Borland\Delphi7\ObjRepos\OKCANCL2.pas' {OKRightDlg},
+  fuAbout in 'fuAbout.pas' {fmAbout};
 
 {$R *.RES}
 
 begin
   Application.Initialize;
   Application.CreateForm(TMainForm, MainForm);
+  Application.CreateForm(TfmAbout, fmAbout);
   Application.Run;
 end.
 

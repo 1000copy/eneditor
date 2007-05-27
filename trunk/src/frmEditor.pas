@@ -9,7 +9,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
   uEditAppIntfs, SynEdit, SynEditTypes, SynEditMiscProcs,uAction,ActnList,
   SynEditMiscClasses, SynEditSearch,ComCtrls ,uMRU,uEditorConf,uHighlighters,
-  Dialogs,SynEditHighlighter;
+  Dialogs,SynEditHighlighter,fuTools;
 
 type
   TEditorKind = (ekBorderless, ekInTabsheet, ekMDIChild);
@@ -175,6 +175,8 @@ type
     function GetFont:TFont;
     procedure DoOpenFile(AFileName: string;pctrlMain:TPageControl);
     procedure AskEnable ;
+    function GetEditConf :IXMLEnEditorType;
+    procedure RunToolsConf ;
   end;
   implementation
 
@@ -553,6 +555,7 @@ begin
   FFont := TFont.Create ;
   FFont.Name := FEditorConf.Font.Name ;
   FFont.Size := FEditorConf.Font.Size ;
+  //FEditorConf.Tools.Tool[0].Title
   Highlighters := THighlighters.Create;
   dlgFileOpen :=TOpenDialog.Create(nil);
   dlgFileOpen.Filter :=  Highlighters.GetFilters ;
@@ -582,7 +585,7 @@ begin
 end;
 procedure TEditorFactory.InitMenu;
 var
-  mHelp,mFile,mView,mEdit,mi : TMenuItem ;
+  mTools,mHelp,mFile,mView,mEdit,mi : TMenuItem ;
   acFile ,ac: TAction ;
   MainMenu : TMainMenu ;
 begin 
@@ -715,7 +718,15 @@ begin
   mView.add(mi);
   mi.Action := TacViewStatusBar.Create(MainForm) ;
   // Associate MainMenu
-  // Edit Menu
+  // Tools
+  mTools := TMenuItem.Create(MainMenu) ;
+  mTools.Caption := 'Tools';
+  MainMenu.Items.add(mTools);
+  // Custom
+  mi := TMenuItem.Create(MainMenu) ;
+  mTools.add(mi);
+  mi.Action := TacToolsConf.Create(MainForm) ;
+  // Help
   mHelp := TMenuItem.Create(MainMenu) ;
   mHelp.Action := TacOnlyUpdate.Create(MainForm) ;
   MainMenu.Items.add(mHelp);
@@ -1247,6 +1258,16 @@ procedure TEditorFactory.AskEnable;
 begin
   fMRU.AskEnable ;
   fMRUFolders.AskEnable ;
+end;
+
+function TEditorFactory.GetEditConf: IXMLEnEditorType;
+begin
+  Result := Self.FEditorConf ;
+end;
+
+procedure TEditorFactory.RunToolsConf;
+begin
+  RunTools(Self.FEditorConf);
 end;
 
 end.

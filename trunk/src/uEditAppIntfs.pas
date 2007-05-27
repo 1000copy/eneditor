@@ -6,7 +6,7 @@ unit uEditAppIntfs;
 interface
 
 uses
-  Windows, Classes, Forms, ComCtrls,Graphics,SynEditHighlighter;
+  Windows, Classes, Forms, ComCtrls,Graphics,SynEditHighlighter,uEditorConf;
 
 type
   IEditor = interface
@@ -40,7 +40,8 @@ type
     procedure ReleaseUntitledNumber(ANumber: integer);
     procedure AskEnable ;
     function GetSaveFileName(var ANewName: string;AHighlighter: TSynCustomHighlighter): boolean;
-
+    function GetEditConf :IXMLEnEditorType;
+    procedure RunToolsConf ;
   end;
 
   IEditCommands = interface

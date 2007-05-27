@@ -2,7 +2,7 @@ unit uAction;
 
 interface
 uses
-  SysUtils ,ActnList ,Classes,uEditAppIntfs,Menus,Dialogs,Forms,Windows;
+  SysUtils ,ActnList ,Classes,uEditAppIntfs,Menus,Dialogs,Forms,Windows,futools,fuAbout;
 type
   TacBase = class(TAction)
   protected
@@ -195,6 +195,8 @@ type
     constructor Create(Owner : TComponent);override;
   end;
   TacOnlyUpdate =class(TacBase)
+  private
+    fm : TfmAbout ;
   protected
     procedure Update(Sender: TObject);override ;
     procedure Execute(Sender: TObject);override ;
@@ -202,6 +204,13 @@ type
     constructor Create(Owner : TComponent);override;
   end;
 
+  TacToolsConf =class(TacBase)
+  protected
+    procedure Update(Sender: TObject);override ;
+    procedure Execute(Sender: TObject);override ;
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
 
 implementation
 uses frmMain;
@@ -745,13 +754,18 @@ end;
 constructor TacOnlyUpdate.Create(Owner: TComponent);
 begin
   inherited;
-
+  Caption :='Help';
 end;
 
 procedure TacOnlyUpdate.Execute(Sender: TObject);
 begin
   inherited;
-
+  fm := TfmAbout.Create(nil) ;
+  try
+    fm.ShowModal;
+  finally
+    fm.Free ;
+  end;
 end;
 
 procedure TacOnlyUpdate.Update(Sender: TObject);
@@ -780,6 +794,26 @@ begin
       StatusBar.Panels[2].Text := '';
     end;
   end;
+end;
+
+{ TacToolsConf }
+
+constructor TacToolsConf.Create(Owner: TComponent);
+begin
+  inherited;
+  Caption := 'Custom..' ;
+end;
+
+procedure TacToolsConf.Execute(Sender: TObject);
+begin
+  inherited;
+  GI_EditorFactory.RunToolsConf ;
+end;
+
+procedure TacToolsConf.Update(Sender: TObject);
+begin
+  inherited;
+
 end;
 
 end.
