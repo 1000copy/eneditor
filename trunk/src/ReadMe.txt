@@ -1,7 +1,8 @@
 
 --------------May 27, 2007 --------------
   6. tip user I can do as default editor of text 
-  7. Shell integation : Edit by enEditor  
+  7. Shell integation : Edit by enEditor
+  8. Script enhanced : May be lisp or PascalScript? more research on synedit need to pay   
 --------------May 23, 2007 -------------- 
   3. DONE @May 27,2007   
     Refactor : Move dmCommands.ActionList to MainForm
@@ -22,6 +23,7 @@ TASK
      Run Command 
      can run any  command with parameters
      can trap output of the command
+     Manage tool list 
 
 --------------May 22, 2007 --------------
 TIPS : Now I have release source code of the eneditor into codehosting provided by google (http://code.google.com/p/eneditor)
