@@ -4,4 +4,9 @@
 		<Name>ËÎÌו</Name>
 		<Size>11</Size>
 	</Font>
+	<Tools>
+		<Tool title="dir" cmd="c:\windows\system32\cmd.exe" argument="/c dir"></Tool>
+		<Tool title="dir c:\" cmd="c:\windows\system32\cmd.exe" argument="/c dir c:\"></Tool>
+		<Tool title="dir e:\" cmd="c:\windows\system32\cmd.exe" argument="/c dir e:\"></Tool>
+	</Tools>
 </enEditor>

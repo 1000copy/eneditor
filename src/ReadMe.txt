@@ -1,6 +1,7 @@
 
 --------------May 27, 2007 --------------
-
+  6. tip user I can do as default editor of text 
+  7. Shell integation : Edit by enEditor  
 --------------May 23, 2007 -------------- 
   3. DONE @May 27,2007   
     Refactor : Move dmCommands.ActionList to MainForm
