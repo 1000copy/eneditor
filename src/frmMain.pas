@@ -35,10 +35,7 @@ uses
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
   //InitMenu ;
-  ShowMessage(ParamStr(1));
-  ShowMessage('1');
   GI_EditorFactory := TEditorFactory.Create;
-  ShowMessage('2');
   CmdLineOpenFiles(TRUE);
   if Self.pctrlMain.ActivePage = nil then
    GI_EditorFactory.DoOpenFile('',Self.pctrlMain);
