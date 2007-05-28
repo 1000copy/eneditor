@@ -517,7 +517,7 @@ end;
 
 
 const
-  ConfFile = '.\enEditorConf.xml';
+  ConfFile = 'enEditorConf.xml';
 procedure TEditorFactory.OnOpenMRUFile(Sender: TObject; const FileName: String);
 var
   i: integer;
@@ -553,7 +553,9 @@ begin
   InitMenu ;
   FXMLDoc := TXMLDocument.Create(nil);
   FXMLDoc.Options := FXMLDoc.Options + [doAutoSave];
-  FXMLDoc.FileName := ConfFile;
+  // Must be a absolute directory ,otherwise will report
+  // error when Shell click a text file !
+  FXMLDoc.FileName := ExtractFilePath(ParamStr(0))+ ConfFile;
   FXMLDoc.Active := True ;
   //FEditorConf := LoadenEditor(ConfFile);
   FEditorConf := GetenEditor (FXMLDoc);
