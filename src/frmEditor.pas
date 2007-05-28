@@ -9,7 +9,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
   uEditAppIntfs, SynEdit, SynEditTypes, SynEditMiscProcs,uAction,ActnList,
   SynEditMiscClasses, SynEditSearch,ComCtrls ,uMRU,uEditorConf,uHighlighters,
-  Dialogs,SynEditHighlighter,fuTools;
+  Dialogs,SynEditHighlighter,fuTools,XMLDoc,XMLIntf;
 
 type
   TEditorKind = (ekBorderless, ekInTabsheet, ekMDIChild);
@@ -144,6 +144,7 @@ type
     FEditorConf : IXMLEnEditorType ;
     FFont : TFont ;
     FPageControl : TPageControl ;
+    FXMLDoc : TXMLDocument ;
     function CanCloseAll: boolean;
     procedure CloseAll;
     function CreateTabSheet(AOwner: TPageControl): IEditor;
@@ -550,8 +551,12 @@ begin
   fMRUFolders.OnClick := OnOpenMRUFolders ;
   fMRUFolders.RegistryPath:='\software\lcjun\enEditor\mruFolders';
   InitMenu ;
-
-  FEditorConf := LoadenEditor(ConfFile);
+  FXMLDoc := TXMLDocument.Create(nil);
+  FXMLDoc.Options := FXMLDoc.Options + [doAutoSave];
+  FXMLDoc.FileName := ConfFile;
+  FXMLDoc.Active := True ;
+  //FEditorConf := LoadenEditor(ConfFile);
+  FEditorConf := GetenEditor (FXMLDoc);
   FFont := TFont.Create ;
   FFont.Name := FEditorConf.Font.Name ;
   FFont.Size := FEditorConf.Font.Size ;
@@ -736,6 +741,9 @@ begin
 end;
 destructor TEditorFactory.Destroy;
 begin
+//  Because FXMLDoc cast to a IXMLDocument ,so here must not be released 
+//  FXMLDoc.Free;
+
   dlgFileOpen.Free;
   FFont.Free ;
   fMRU.free ;
