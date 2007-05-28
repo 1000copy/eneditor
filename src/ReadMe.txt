@@ -1,6 +1,7 @@
 
 --------------May 27, 2007 --------------
-  6. tip user I can do as default editor of text 
+  6.DONE @ May 28,2007 
+   tip user I can do as default editor of text 
   7. Shell integation : Edit by enEditor
   8. Script enhanced : May be lisp or PascalScript? more research on synedit need to pay   
 --------------May 23, 2007 -------------- 
