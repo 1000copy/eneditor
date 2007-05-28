@@ -19,7 +19,7 @@ TASK
   1. DONE on May 23,2007 
      Refactor :replace menu item File-Close with Windows-close and remove the last .
      DoOpenFile implementation code should be placed inside IEditorFactory
-  2. 
+  2. DONE on May 28,2007 
      Run Command 
      can run any  command with parameters
      can trap output of the command

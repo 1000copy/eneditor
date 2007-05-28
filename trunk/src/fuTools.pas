@@ -13,31 +13,98 @@ type
     btnProp: TButton;
     btnNew: TButton;
     btnDel: TButton;
+    btnRun: TButton;
+    procedure btnPropClick(Sender: TObject);
+    procedure btnNewClick(Sender: TObject);
+    procedure btnDelClick(Sender: TObject);
+    procedure btnExitClick(Sender: TObject);
+    procedure btnRunClick(Sender: TObject);
   private
     { Private declarations }
+    FEditorConf : IXMLEnEditorType ;
+    procedure Reload;
   public
     { Public declarations }
   end;
 
 
-procedure RunTools(FEditorConf : IXMLEnEditorType);
+procedure RunTools(AEditorConf : IXMLEnEditorType);
 
 implementation
 
 {$R *.dfm}
+uses fuToolProp ;
 
-procedure RunTools(FEditorConf : IXMLEnEditorType);
+procedure RunTools(AEditorConf : IXMLEnEditorType);
 var
   fm: TfmTools; i : Integer ;
 begin
   fm := TfmTools.Create(nil);
+  with fm do
   try
-  fm.lst1.Clear ;
-  for i := 0 to FEditorConf.Tools.Count -1 do
-    fm.lst1.Items.Add(FEditorConf.Tools.Tool[i].Title );
-  fm.ShowModal ;
+   FEditorConf := AEditorConf ;
+   Reload;
+   ShowModal ;
   finally
-    fm.Free ;
+    Free ;
   end;
 end;
+procedure TfmTools.btnPropClick(Sender: TObject);
+var i : integer ;
+begin
+  RunToolProp(FEditorConf,self.lst1.ItemIndex);
+  Reload;
+end;
+
+procedure TfmTools.btnNewClick(Sender: TObject);
+var i : integer ;
+begin
+  RunToolProp(FEditorConf,-1);
+  Reload;
+
+end;
+
+procedure TfmTools.btnDelClick(Sender: TObject);
+var i : integer ;
+begin
+  if self.lst1.ItemIndex > -1 then begin
+    FEditorConf.Tools.Delete(self.lst1.ItemIndex);
+    Reload ;
+  end;
+end;
+
+procedure TfmTools.Reload;
+var i : integer ;
+begin
+  lst1.Clear ;
+  for i := 0 to FEditorConf.Tools.Count -1 do
+   lst1.Items.Add(FEditorConf.Tools.Tool[i].Title );
+end;
+procedure TfmTools.btnExitClick(Sender: TObject);
+begin
+  Close ;
+end;
+
+procedure TfmTools.btnRunClick(Sender: TObject);
+var
+  xmlTool : IXMLTooltype ;
+  a : String ;
+  sl : TStringList ;
+begin
+  if self.lst1.ItemIndex > -1 then begin
+    sl := TStringList.Create ;
+    try
+       xmlTool := FEditorConf.Tools.Tool[self.lst1.ItemIndex] ;
+      a := xmlTool.Cmd + ' ' +xmlTool.Argument ;
+      sl.Add(a);
+      sl.Add('Pause');
+      sl.SaveToFile('a.bat');
+      WinExec('a.bat',1) ;
+    finally
+      sl.Free ;
+      //DeleteFile('a.bat');
+    end;
+  end;
+end;
+
 end.

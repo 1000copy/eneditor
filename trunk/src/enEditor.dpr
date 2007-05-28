@@ -51,7 +51,8 @@ uses
   fuTools in 'fuTools.pas' {fmTools},
   uEditorConf in 'uEditorConf.pas',
   OKCANCL2 in 'C:\Program Files\Borland\Delphi7\ObjRepos\OKCANCL2.pas' {OKRightDlg},
-  fuAbout in 'fuAbout.pas' {fmAbout};
+  fuAbout in 'fuAbout.pas' {fmAbout},
+  fuToolProp in 'fuToolProp.pas' {frmToolProp};
 
 {$R *.RES}
 
@@ -59,6 +60,7 @@ begin
   Application.Initialize;
   Application.CreateForm(TMainForm, MainForm);
   Application.CreateForm(TfmAbout, fmAbout);
+  Application.CreateForm(TfrmToolProp, frmToolProp);
   Application.Run;
 end.
 

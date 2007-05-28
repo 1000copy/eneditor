@@ -3,7 +3,7 @@ object fmTools: TfmTools
   Top = 292
   Width = 468
   Height = 341
-  Caption = 'frmTools'
+  Caption = 'Tools'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -28,6 +28,7 @@ object fmTools: TfmTools
     Height = 25
     Caption = 'Exit'
     TabOrder = 1
+    OnClick = btnExitClick
   end
   object btnProp: TButton
     Left = 368
@@ -36,6 +37,7 @@ object fmTools: TfmTools
     Height = 25
     Caption = 'Property'
     TabOrder = 2
+    OnClick = btnPropClick
   end
   object btnNew: TButton
     Left = 368
@@ -44,6 +46,7 @@ object fmTools: TfmTools
     Height = 25
     Caption = 'New'
     TabOrder = 3
+    OnClick = btnNewClick
   end
   object btnDel: TButton
     Left = 368
@@ -52,5 +55,15 @@ object fmTools: TfmTools
     Height = 25
     Caption = 'Delete'
     TabOrder = 4
+    OnClick = btnDelClick
+  end
+  object btnRun: TButton
+    Left = 368
+    Top = 184
+    Width = 75
+    Height = 25
+    Caption = 'Run'
+    TabOrder = 5
+    OnClick = btnRunClick
   end
 end

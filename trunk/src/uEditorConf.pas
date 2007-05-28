@@ -3,9 +3,9 @@
 {                                                                    }
 {                          XML Data Binding                          }
 {                                                                    }
-{         Generated on: 2007-5-27 ÏÂÎç 08:30:10                      }
+{         Generated on: 2007-5-28 ÏÂÎç 10:37:10                      }
 {       Generated from: E:\codestock\eneditor\src\enEditorConf.xml   }
-{   Settings stored in: E:\codestock\eneditor\src\enEditorConf.xdb   }
+{   Settings stored in: E:\codestock\eneditor\src\uEditorConf.xdb    }
 {                                                                    }
 {********************************************************************}
 
@@ -27,7 +27,7 @@ type
 { IXMLEnEditorType }
 
   IXMLEnEditorType = interface(IXMLNode)
-    ['{42FB0939-C853-4761-89DB-D6B66390EB89}']
+    ['{3F736D51-7FD5-4CF9-B738-B4F9485D6763}']
     { Property Accessors }
     function Get_Font: IXMLFontType;
     function Get_Tools: IXMLToolsType;
@@ -39,7 +39,7 @@ type
 { IXMLFontType }
 
   IXMLFontType = interface(IXMLNode)
-    ['{97929F81-2529-4E90-8971-EF82099D16E2}']
+    ['{F97B58BC-6593-4E50-991C-FFB9618B6193}']
     { Property Accessors }
     function Get_Name: WideString;
     function Get_Size: Integer;
@@ -53,7 +53,7 @@ type
 { IXMLToolsType }
 
   IXMLToolsType = interface(IXMLNodeCollection)
-    ['{12C8B2C9-D848-419F-96E4-CEE9EE57693E}']
+    ['{ECBB089D-DAF2-426C-8570-86BC0C45A854}']
     { Property Accessors }
     function Get_Tool(Index: Integer): IXMLToolType;
     { Methods & Properties }
@@ -65,18 +65,21 @@ type
 { IXMLToolType }
 
   IXMLToolType = interface(IXMLNode)
-    ['{A8F0F6C6-12D6-48D3-B427-63F4C8A94B50}']
+    ['{A671820E-1C06-47A7-8DA6-E016E532B851}']
     { Property Accessors }
     function Get_Title: WideString;
     function Get_Cmd: WideString;
     function Get_Argument: WideString;
+    function Get_Initdir: WideString;
     procedure Set_Title(Value: WideString);
     procedure Set_Cmd(Value: WideString);
     procedure Set_Argument(Value: WideString);
+    procedure Set_Initdir(Value: WideString);
     { Methods & Properties }
     property Title: WideString read Get_Title write Set_Title;
     property Cmd: WideString read Get_Cmd write Set_Cmd;
     property Argument: WideString read Get_Argument write Set_Argument;
+    property Initdir: WideString read Get_Initdir write Set_Initdir;
   end;
 
 { Forward Decls }
@@ -128,9 +131,11 @@ type
     function Get_Title: WideString;
     function Get_Cmd: WideString;
     function Get_Argument: WideString;
+    function Get_Initdir: WideString;
     procedure Set_Title(Value: WideString);
     procedure Set_Cmd(Value: WideString);
     procedure Set_Argument(Value: WideString);
+    procedure Set_Initdir(Value: WideString);
   end;
 
 { Global Functions }
@@ -257,6 +262,16 @@ end;
 procedure TXMLToolType.Set_Argument(Value: WideString);
 begin
   SetAttribute('argument', Value);
+end;
+
+function TXMLToolType.Get_Initdir: WideString;
+begin
+  Result := AttributeNodes['initdir'].Text;
+end;
+
+procedure TXMLToolType.Set_Initdir(Value: WideString);
+begin
+  SetAttribute('initdir', Value);
 end;
 
 end.
