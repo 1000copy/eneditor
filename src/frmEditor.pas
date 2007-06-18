@@ -121,6 +121,7 @@ type
     procedure SetFont(Font :TFont);overload ;
     procedure SetFont(FontName : String;FontSize :Integer);overload ;
     function  GetUntitledNumber : Integer ;
+    function  GetStrings: TStrings ;
   end;
 const
   WM_DELETETHIS  =  WM_USER + 42;
@@ -165,7 +166,7 @@ type
     dlgFileOpen : TOpenDialog ;
     dlgFileSave : TSaveDialog ;
   public
-    constructor Create;
+    constructor Create (APageControl:TPageControl);
     destructor Destroy; override;
     procedure CloseEditor ;
     procedure SetFont(Font :TFont);overload;
@@ -174,7 +175,7 @@ type
     function GetMRU (I:Integer): String;
     procedure SetFont(FontName : String;FontSize :Integer);overload ;
     function GetFont:TFont;
-    procedure DoOpenFile(AFileName: string;pctrlMain:TPageControl);
+    procedure DoOpenFile(AFileName: string);
     procedure AskEnable ;
     function GetEditConf :IXMLEnEditorType;
     procedure RunToolsConf ;
@@ -507,6 +508,11 @@ begin
   Result := Self.fUntitledNumber ;
 end;
 
+function TEditor.GetStrings: TStrings;
+begin
+  Result := Self.fForm.SynEditor.Lines ;
+end;
+
 { TEditorTabSheet }
 
 
@@ -523,7 +529,7 @@ var
   i: integer;
   s: string;
 begin
-  GI_EditorFactory.DoOpenFile(FileName,MainForm.pctrlMain);
+  GI_EditorFactory.DoOpenFile(FileName);
 end;
 
 procedure TEditorFactory.OnOpenMRUFolders(Sender: TObject; const AFileName: String);
@@ -534,12 +540,13 @@ begin
   with dlgFileOpen do begin
       dlgFileOpen.InitialDir := AFileName ;
     if Execute then
-      GI_EditorFactory.DoOpenFile(FileName,MainForm.pctrlMain);
+      GI_EditorFactory.DoOpenFile(FileName);
   end;
 end;
-constructor TEditorFactory.Create;
+constructor TEditorFactory.Create (APageControl:TPageControl);
 begin
-  inherited Create;
+  inherited Create ;
+  Self.FPageControl := APageControl ;
   fEditors := TInterfaceList.Create;
   fMRU := TadpMRU.Create(nil) ;
 //  fMRU.ParentMenuItem := mRecentFiles ;
@@ -733,6 +740,10 @@ begin
   mi := TMenuItem.Create(MainMenu) ;
   mTools.add(mi);
   mi.Action := TacToolsConf.Create(MainForm) ;
+  // TextFormattor
+  mi := TMenuItem.Create(MainMenu) ;
+  mTools.add(mi);
+  mi.Action := TacToolsTextFormattor.Create(MainForm) ;
   // Help
   mHelp := TMenuItem.Create(MainMenu) ;
   mHelp.Action := TacOnlyUpdate.Create(MainForm) ;
@@ -1219,13 +1230,13 @@ begin
   Result := FFont ;
 end;
 
-procedure TEditorFactory.DoOpenFile(AFileName: string;pctrlMain:TPageControl);
+procedure TEditorFactory.DoOpenFile(AFileName: string);
 var
   i: integer;
   LEditor: IEditor;
 begin
   Assert(GI_EditorFactory <> nil);
-  FPageControl :=  pctrlMain ;
+  //FPageControl :=  pctrlMain ;
   AFileName := ExpandFileName(AFileName);
   if AFileName <> '' then begin
     RemoveMRU(AFileName);
@@ -1238,7 +1249,7 @@ begin
       end;
     end;
   end;
-  LEditor := CreateTabSheet(pctrlMain);
+  LEditor := CreateTabSheet(FPageControl);
   LEditor.OpenFile(AFileName);
 end;
 

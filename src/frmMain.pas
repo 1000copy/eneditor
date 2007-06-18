@@ -35,10 +35,11 @@ uses
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
   //InitMenu ;
-  GI_EditorFactory := TEditorFactory.Create;
+  GI_EditorFactory := TEditorFactory.Create(Self.pctrlMain);
+
   CmdLineOpenFiles(TRUE);
   if Self.pctrlMain.ActivePage = nil then
-   GI_EditorFactory.DoOpenFile('',Self.pctrlMain);
+   GI_EditorFactory.DoOpenFile('');
   Left := 100 ;Top :=100 ;Height := 600 ;Width  := 800 ;
 end;
 
@@ -60,7 +61,7 @@ begin
     if not AMultipleFiles and (Cnt > 1) then
       Cnt := 1;
     for i := 1 to Cnt do
-      GI_EditorFactory.DoOpenFile(ParamStr(i),Self.pctrlMain);
+      GI_EditorFactory.DoOpenFile(ParamStr(i));
 
     Result := TRUE;
   end else

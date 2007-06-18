@@ -211,6 +211,13 @@ type
   public
     constructor Create(Owner : TComponent);override;
   end;
+  TacToolsTextFormattor=class(TacBase)
+  protected
+    procedure Update(Sender: TObject);override ;
+    procedure Execute(Sender: TObject);override ;
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
 
 implementation
 uses frmMain;
@@ -269,7 +276,7 @@ end;
 procedure TacFileNew.Execute(Sender: TObject);
 begin
   inherited;
-  GI_EditorFactory.DoOpenFile('',MainForm.pctrlMain);
+  GI_EditorFactory.DoOpenFile('');
 end;
 
 
@@ -294,7 +301,7 @@ begin
   inherited;
   with dlgFileOpen do begin
     if Execute then
-      GI_EditorFactory.DoOpenFile(FileName,MainForm.pctrlMain);
+      GI_EditorFactory.DoOpenFile(FileName);
   end;
 end;
 
@@ -811,6 +818,27 @@ begin
 end;
 
 procedure TacToolsConf.Update(Sender: TObject);
+begin
+  inherited;
+
+end;
+
+{ TacToolsTextFormattor }
+
+constructor TacToolsTextFormattor.Create(Owner: TComponent);
+begin
+  inherited;
+  Caption := 'Text Formattor';
+end;
+
+procedure TacToolsTextFormattor.Execute(Sender: TObject);
+begin
+  inherited;
+  GI_EditorFactory.DoOpenFile('');
+  GI_ActiveEditor.GetStrings.Text := 'abc';
+end;
+
+procedure TacToolsTextFormattor.Update(Sender: TObject);
 begin
   inherited;
 
