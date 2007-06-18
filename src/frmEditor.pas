@@ -8,7 +8,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
   uEditAppIntfs, SynEdit, SynEditTypes, SynEditMiscProcs,uAction,ActnList,
-  SynEditMiscClasses, SynEditSearch,ComCtrls ,uMRU,uEditorConf,uHighlighters,
+  SynEditMiscClasses, SynEditSearch,ComCtrls ,uMRU,uEditorConf,uHLs,
   Dialogs,SynEditHighlighter,fuTools,XMLDoc,XMLIntf;
 
 type
@@ -569,11 +569,11 @@ begin
   FFont.Name := FEditorConf.Font.Name ;
   FFont.Size := FEditorConf.Font.Size ;
   //FEditorConf.Tools.Tool[0].Title
-  Highlighters := THighlighters.Create;
+  HLs := THLs.Create;
   dlgFileOpen :=TOpenDialog.Create(nil);
-  dlgFileOpen.Filter :=  Highlighters.GetFilters ;
+  dlgFileOpen.Filter :=  HLs.GetFilters ;
   dlgFileSave :=TSaveDialog.Create(nil);
-  dlgFileSave.Filter :=  Highlighters.GetFilters ;
+  dlgFileSave.Filter :=  HLs.GetFilters ;
 
 end;
 function TEditorFactory.GetSaveFileName(var ANewName: string;
@@ -590,7 +590,7 @@ begin
     if AHighlighter <> nil then
       Filter := AHighlighter.DefaultFilter
     else
-      Filter := Highlighters.GetFilters;
+      Filter := HLs.GetFilters;
     if Execute then begin
       ANewName := FileName;
       Result := TRUE;
@@ -1076,7 +1076,7 @@ procedure TEditorForm.DoUpdateHighlighter;
 begin
   Assert(fEditor <> nil);
   if fEditor.fFileName <> '' then begin
-    SynEditor.Highlighter := Highlighters.GetHighlighterForFile(
+    SynEditor.Highlighter := HLs.GetHighlighterForFile(
       fEditor.fFileName);
   end else
     SynEditor.Highlighter := nil;
