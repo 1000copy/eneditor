@@ -1,4 +1,6 @@
-
+--------------May 30, 2007 --------------
+  9. Serial format file generator ,like SMS StockIO file 
+ 10. Find Replace 's Regexp   
 --------------May 27, 2007 --------------
   6.DONE @ May 28,2007 
    tip user I can do as default editor of text 
@@ -13,7 +15,7 @@
     procedure RemoveMRU(Filename : String);
     function GetMRUCount:Integer;
     function GetMRU (I:Integer): String; 
-  5. DONE @May 25,2007 
+  5. DONE @May 25,2007         Z
      Refactor : Merge IEdit.Close to IEditFactory.CloseEditor(FileName:String);  
 --------------May 22, 2007 --------------
 TASK

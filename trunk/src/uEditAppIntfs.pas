@@ -22,6 +22,7 @@ type
     procedure OpenFile(AFileName: string);
     procedure SetFont(Font :TFont);overload ;
     function  GetUntitledNumber : Integer ;
+    function  GetStrings: TStrings ;
   end;
 
   IEditorFactory = interface
@@ -35,7 +36,7 @@ type
     function GetFont:TFont;
     procedure SetFont(Font :TFont);overload ;
     procedure SetFont(FontName : String;FontSize :Integer);overload ;
-    procedure DoOpenFile(AFileName: string;pctrlMain:TPageControl);
+    procedure DoOpenFile(AFileName: string);
     function GetUntitledNumber: integer;
     procedure ReleaseUntitledNumber(ANumber: integer);
     procedure AskEnable ;

@@ -20,6 +20,7 @@ implementation
 
 {$R *.DFM}
 uses Registry,ShlObj;
+
 procedure RegisterFileType(ExtName:String; AppName:String) ;
 var
   reg:TRegistry;
@@ -28,7 +29,10 @@ begin
   try
    reg.RootKey:=HKEY_CLASSES_ROOT;
    reg.OpenKey('.' + ExtName, True) ;
-   reg.WriteString('', ExtName + 'file') ;
+   // Do Register
+   //reg.WriteString('', ExtName + 'file') ;
+   // Do Cancel !
+   reg.WriteString('', '') ;
    reg.CloseKey;
    reg.CreateKey(ExtName + 'file') ;
    reg.OpenKey(ExtName + 'file\DefaultIcon', True) ;
