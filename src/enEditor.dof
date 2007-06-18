@@ -100,7 +100,7 @@ Conditionals=
 DebugSourceDirs=
 UsePackages=0
 [Parameters]
-RunParams="C:\Documents and Settings\Administrator\×ÀÃæ\cnwizards_0.8.1.252_src\cnwizards\License.enu.txt"
+RunParams=
 HostApplication=
 Launcher=
 UseLauncher=0

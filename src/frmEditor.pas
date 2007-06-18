@@ -148,7 +148,6 @@ type
     FXMLDoc : TXMLDocument ;
     function CanCloseAll: boolean;
     procedure CloseAll;
-    function CreateTabSheet(AOwner: TPageControl): IEditor;
     function GetEditorCount: integer;
     function GetEditor(Index: integer): IEditor;
     procedure RemoveEditor(AEditor: IEditor);
@@ -573,6 +572,8 @@ begin
   Highlighters := THighlighters.Create;
   dlgFileOpen :=TOpenDialog.Create(nil);
   dlgFileOpen.Filter :=  Highlighters.GetFilters ;
+  dlgFileSave :=TSaveDialog.Create(nil);
+  dlgFileSave.Filter :=  Highlighters.GetFilters ;
 
 end;
 function TEditorFactory.GetSaveFileName(var ANewName: string;
@@ -756,7 +757,7 @@ destructor TEditorFactory.Destroy;
 begin
 //  Because FXMLDoc cast to a IXMLDocument ,so here must not be released 
 //  FXMLDoc.Free;
-
+  dlgFileSave.Free ;
   dlgFileOpen.Free;
   FFont.Free ;
   fMRU.free ;
@@ -794,37 +795,7 @@ begin
 end;
 
 
-function TEditorFactory.CreateTabSheet(AOwner: TPageControl): IEditor;
-var
-  Sheet: TEditorTabSheet;
-  LForm: TEditorForm;
-begin
-  Sheet := TEditorTabSheet.Create(AOwner);
-  try
-    Sheet.PageControl := AOwner;
-    LForm := TEditorForm.Create(Sheet);
-    with LForm do begin
-      fEditor := TEditor.Create(LForm);
-      Sheet.FEditIntf  := fEditor ;
-      Result := fEditor;
-      fKind := ekInTabsheet;
-      BorderStyle := bsNone;
-      Parent := Sheet;
-      Align := alClient;
-      Visible := TRUE;
-      AOwner.ActivePage := Sheet;
-      LForm.SetFocus;
-      GI_ActiveEditor := fEditor ;
-      fEditor.SetFont(FEditorConf.Font.Name,FEditorConf.Font.Size);
-    end;
-    // fix for Delphi 4 (???)
-    LForm.Realign;
-    if Result <> nil then
-      fEditors.Add(Result);
-  except
-    Sheet.Free;
-  end;
-end;
+
 
 function TEditorFactory.GetEditorCount: integer;
 begin
@@ -1231,26 +1202,65 @@ begin
 end;
 
 procedure TEditorFactory.DoOpenFile(AFileName: string);
-var
-  i: integer;
-  LEditor: IEditor;
-begin
-  Assert(GI_EditorFactory <> nil);
-  //FPageControl :=  pctrlMain ;
-  AFileName := ExpandFileName(AFileName);
-  if AFileName <> '' then begin
-    RemoveMRU(AFileName);
-    // activate the editor if already open
-    for i := GI_EditorFactory.GetEditorCount - 1 downto 0 do begin
-      LEditor := GI_EditorFactory.Editor[i];
-      if CompareText(LEditor.GetFileName, AFileName) = 0 then begin
-        LEditor.Activate;
-        exit;
+  function CreateEditor(AFileName : String): IEditor;
+  var
+    Sheet: TEditorTabSheet;
+    LForm: TEditorForm;
+  begin
+    Sheet := TEditorTabSheet.Create(FPageControl);
+    try
+      Sheet.PageControl := FPageControl;
+      LForm := TEditorForm.Create(Sheet);
+      with LForm do begin
+        fEditor := TEditor.Create(LForm);
+        Sheet.FEditIntf  := fEditor ;
+        Result := fEditor;
+        fKind := ekInTabsheet;
+        BorderStyle := bsNone;
+        Parent := Sheet;
+        Align := alClient;
+        Visible := TRUE;
+        FPageControl.ActivePage := Sheet;
+        LForm.SetFocus;
+        GI_ActiveEditor := fEditor ;
+        fEditor.SetFont(FEditorConf.Font.Name,FEditorConf.Font.Size);
+        fEditor.OpenFile(AFileName);
+        Result := fEditor ;
       end;
+      // fix for Delphi 4 (???)
+      LForm.Realign;
+      if Result <> nil then
+        fEditors.Add(Result);
+    except
+      Sheet.Free;
     end;
   end;
-  LEditor := CreateTabSheet(FPageControl);
-  LEditor.OpenFile(AFileName);
+  function GetEditorByFile(FileName : string ): IEditor ;
+  var i : integer ;
+  var Editor : IEditor ;
+  begin
+    if AFileName ='' then begin
+      Result := nil;
+      Exit ;
+    end;
+    for i := GetEditorCount - 1 downto 0 do begin
+      Editor := GetEditor(i);
+      if CompareText(Editor.GetFileName, AFileName) = 0 then begin
+        Result := Editor ;
+        Break ;
+      end;
+    end;       
+  end;
+var  Editor: IEditor;
+begin
+  Assert(GI_EditorFactory <> nil);
+  AFileName := ExpandFileName(AFileName);
+  if AFileName <> '' then 
+    RemoveMRU(AFileName);
+  Editor := GetEditorByFile(AFileName) ;
+  if not Assigned(Editor) then
+    Editor := CreateEditor(AFileName);
+  Editor.Activate;
 end;
 
 function TEditorFactory.GetUntitledNumber: integer;
