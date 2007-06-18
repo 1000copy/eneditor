@@ -10,7 +10,8 @@ type
   TfmAbout = class(TForm)
     Button1: TButton;
     mmo1: TMemo;
-    procedure FormClick(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure btn1Click(Sender: TObject);
   end;
 
 var
@@ -21,7 +22,7 @@ implementation
 {$R *.DFM}
 uses Registry,ShlObj;
 
-procedure RegisterFileType(ExtName:String; AppName:String) ;
+procedure RegisterFileType(ExtName:String; AppName:String;IsOn : Boolean ) ;
 var
   reg:TRegistry;
 begin
@@ -30,9 +31,11 @@ begin
    reg.RootKey:=HKEY_CLASSES_ROOT;
    reg.OpenKey('.' + ExtName, True) ;
    // Do Register
-   //reg.WriteString('', ExtName + 'file') ;
+   if IsOn then
+    reg.WriteString('', ExtName + 'file') 
+   else
    // Do Cancel !
-   reg.WriteString('', '') ;
+    reg.WriteString('', '') ;
    reg.CloseKey;
    reg.CreateKey(ExtName + 'file') ;
    reg.OpenKey(ExtName + 'file\DefaultIcon', True) ;
@@ -47,10 +50,14 @@ begin
 
   SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, nil, nil) ;
 end;
-procedure TfmAbout.FormClick(Sender: TObject);
+procedure TfmAbout.Button2Click(Sender: TObject);
 begin
-   //
-   RegisterFileType('txt',ParamStr(0));
+  RegisterFileType('txt',ParamStr(0),True);
+end;
+
+procedure TfmAbout.btn1Click(Sender: TObject);
+begin
+  RegisterFileType('txt',ParamStr(0),False);
 end;
 
 end.

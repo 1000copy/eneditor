@@ -7,7 +7,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  Menus, ActnList, uEditAppIntfs, ComCtrls,uMRU,SynEditHighlighter,uHighlighterProcs,uAction;
+  Menus, ActnList, uEditAppIntfs, ComCtrls,uMRU,SynEditHighlighter,uAction;
 
 type
   TMainForm = class(TForm)
@@ -28,7 +28,7 @@ implementation
 {$R *.DFM}
 
 uses
-  uEditorConf,IniFiles, frmEditor, uHighlighters;
+  uEditorConf,IniFiles, frmEditor, uHLs;
 
 { TMainForm }
 
@@ -48,7 +48,7 @@ begin
   Assert(GI_EditorFactory <> nil );
   GI_EditorFactory.CloseAll;
   GI_EditorFactory := nil ;
-  Highlighters.Free;
+  HLs.Free;
 end;
 
 

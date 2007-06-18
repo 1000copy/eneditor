@@ -41,16 +41,14 @@ uses
   frmMain in 'frmMain.pas' {MainForm},
   uEditAppIntfs in 'uEditAppIntfs.pas',
   frmEditor in 'frmEditor.pas' {EditorForm},
-  uHighlighters in 'uHighlighters.pas' {CommandsDataModule: TDataModule},
+  uHLs in 'uHLs.pas' {CommandsDataModule: TDataModule},
   dlgConfirmReplace in 'dlgConfirmReplace.pas' {ConfirmReplaceDialog},
   dlgReplaceText in 'dlgReplaceText.pas',
   dlgSearchText in 'dlgSearchText.pas' {TextSearchDialog},
-  uHighlighterProcs in 'uHighlighterProcs.pas',
   uMRU in 'uMRU.pas',
   uAction in 'uAction.pas',
   fuTools in 'fuTools.pas' {fmTools},
   uEditorConf in 'uEditorConf.pas',
-  OKCANCL2 in 'C:\Program Files\Borland\Delphi7\ObjRepos\OKCANCL2.pas' {OKRightDlg},
   fuAbout in 'fuAbout.pas' {fmAbout},
   fuToolProp in 'fuToolProp.pas' {frmToolProp};
 
