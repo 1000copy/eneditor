@@ -293,16 +293,19 @@ begin
   inherited;
   Caption :='Open...' ;
   dlgFileOpen := TOpenDialog.Create(Self);
+  dlgFileOpen.Options :=  [ofAllowMultiSelect] + dlgFileOpen.Options;
   ShortCut := Menus.ShortCut(Word('O'),[ssCtrl]);
 end;
 
 procedure TacFileOpen.Execute(Sender: TObject);
+var
+  i :Integer ;
 begin
   inherited;
-  with dlgFileOpen do begin
+  with dlgFileOpen do
     if Execute then
-      GI_EditorFactory.DoOpenFile(FileName);
-  end;
+      for I := 0 to Files.Count -1 do
+        GI_EditorFactory.DoOpenFile(Files.Strings[I]);
 end;
 
 procedure TacFileOpen.Update(Sender: TObject);

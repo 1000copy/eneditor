@@ -9,7 +9,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
   uEditAppIntfs, SynEdit, SynEditTypes, SynEditMiscProcs,uAction,ActnList,
   SynEditMiscClasses, SynEditSearch,ComCtrls ,uMRU,uEditorConf,uHLs,
-  Dialogs,SynEditHighlighter,fuTools,XMLDoc,XMLIntf;
+  Dialogs,SynEditHighlighter,fuTools,XMLDoc,XMLIntf, SynEditRegexSearch;
 
 type
   TEditorKind = (ekBorderless, ekInTabsheet, ekMDIChild);
@@ -29,6 +29,7 @@ type
     lmiEditRedo: TMenuItem;
     N2: TMenuItem;
     SynEditSearch1: TSynEditSearch;
+    SynEditRegexSearch1: TSynEditRegexSearch;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormDestroy(Sender: TObject);
@@ -194,6 +195,7 @@ var
   gbSearchSelectionOnly: boolean;
   gbSearchTextAtCaret: boolean;
   gbSearchWholeWords: boolean;
+  gbSearchRegexp: boolean;
 
   gsSearchText: string;
   gsSearchTextHistory: string;
@@ -537,9 +539,12 @@ var
   s: string;
 begin
   with dlgFileOpen do begin
-      dlgFileOpen.InitialDir := AFileName ;
+    InitialDir := AFileName ;
+    Options := Options + [ofAllowMultiSelect];
     if Execute then
-      GI_EditorFactory.DoOpenFile(FileName);
+      for I := 0 to Files.Count -1 do
+        GI_EditorFactory.DoOpenFile(Files.Strings[I]);
+
   end;
 end;
 constructor TEditorFactory.Create (APageControl:TPageControl);
@@ -1044,6 +1049,10 @@ begin
     Include(Options, ssoSelectedOnly);
   if gbSearchWholeWords then
     Include(Options, ssoWholeWord);
+  if gbSearchRegexp then
+    SynEditor.SearchEngine := SynEditRegexSearch1
+  else
+    SynEditor.SearchEngine := SynEditSearch1 ;
   if SynEditor.SearchReplace(gsSearchText, gsReplaceText, Options) = 0 then
   begin
     MessageBeep(MB_ICONASTERISK);
@@ -1096,6 +1105,7 @@ begin
     SearchCaseSensitive := gbSearchCaseSensitive;
     SearchFromCursor := gbSearchFromCaret;
     SearchInSelectionOnly := gbSearchSelectionOnly;
+    SearchRegularExpression := gbSearchRegexp ;
     // start with last search text
     SearchText := gsSearchText;
     if gbSearchTextAtCaret then begin
@@ -1120,6 +1130,7 @@ begin
       gbSearchWholeWords := SearchWholeWords;
       gsSearchText := SearchText;
       gsSearchTextHistory := SearchTextHistory;
+      gbSearchRegexp := SearchRegularExpression ;
       if AReplace then with dlg as TTextReplaceDialog do begin
         gsReplaceText := ReplaceText;
         gsReplaceTextHistory := ReplaceTextHistory;
