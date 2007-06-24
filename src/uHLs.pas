@@ -10,7 +10,7 @@ uses
   ActnList,
   // Highlighter Class
   SynEditHighlighter,
-  SynHighlighterSQL, SynHighlighterPas,
+  SynHighlighterSQL, SynHighlighterPas,SynHighlighterRuby,
   SynHighlighterXML, SynHighlighterHtml,uMRU;
 
 type
@@ -19,6 +19,7 @@ type
     SynPasSyn1: TSynPasSyn;
     SynSQLSyn1: TSynSQLSyn;
     SynXMLSyn1: TSynXMLSyn;
+    SynRB: TSynRubySyn;
     HL: TStringList;
     function GetHighlighterFromFileExt(AHighlighters: TStringList;
       Extension: string): TSynCustomHighlighter;
@@ -110,8 +111,9 @@ begin
   SynPasSyn1 := TSynPasSyn.Create(Self);
   SynSQLSyn1:= TSynSQLSyn.Create(Self);
   SynXMLSyn1:= TSynXMLSyn.Create(Self);
+  SynRB:=  TSynRubySyn.Create(Self);
   HL := TStringList.Create;
-  GetHL([SynPasSyn1,SynSQLSyn1,SynXMLSyn1],FALSE);
+  GetHL([SynPasSyn1,SynSQLSyn1,SynXMLSyn1,SynRB],FALSE);
 end;
 
 
@@ -127,7 +129,12 @@ end;
 
 function THLs.GetFilters: String;
 begin
-  Result := 'Txt file|*.txt|All files|*.*|Pas|*.pas|sql|*.sql|xml|*.xml'
+  Result := 'TEXT|*.txt|'+
+            'ALL|*.*|'+
+            'PAS|*.pas|'+
+            'SQL|*.sql|'+
+            'XML|*.xml|'+
+            'Ruby|*.rb|'
 end;
 
 function THLs.GetHighlighterForFile(

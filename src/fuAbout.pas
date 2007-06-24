@@ -53,11 +53,13 @@ end;
 procedure TfmAbout.Button2Click(Sender: TObject);
 begin
   RegisterFileType('txt',ParamStr(0),True);
+  RegisterFileType('rb',ParamStr(0),True);
 end;
 
 procedure TfmAbout.btn1Click(Sender: TObject);
 begin
   RegisterFileType('txt',ParamStr(0),False);
+  RegisterFileType('rb',ParamStr(0),False);
 end;
 
 end.
