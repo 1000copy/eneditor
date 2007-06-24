@@ -2,7 +2,7 @@ unit uAction;
 
 interface
 uses
-  SysUtils ,ActnList ,Classes,uEditAppIntfs,Menus,Dialogs,Forms,Windows,futools,fuAbout,uHLs;
+  SysUtils ,ActnList ,Classes,uEditAppIntfs,Menus,Dialogs,Forms,Windows,futools,fuAbout,uHLs,fuTextGene;
 type
   TacBase = class(TAction)
   protected
@@ -836,10 +836,15 @@ begin
 end;
 
 procedure TacToolsTextFormattor.Execute(Sender: TObject);
+var
+   t : String ;
 begin
   inherited;
-  GI_EditorFactory.DoOpenFile('');
-  GI_ActiveEditor.GetStrings.Text := 'abc';
+  t := GetTextGene ;
+  if t <> '' then begin
+    GI_EditorFactory.DoOpenFile('');
+    GI_ActiveEditor.GetStrings.Text := t;
+  end;
 end;
 
 procedure TacToolsTextFormattor.Update(Sender: TObject);
