@@ -2,7 +2,7 @@ unit uAction;
 
 interface
 uses
-  SysUtils ,ActnList ,Classes,uEditAppIntfs,Menus,Dialogs,Forms,Windows,futools,fuAbout;
+  SysUtils ,ActnList ,Classes,uEditAppIntfs,Menus,Dialogs,Forms,Windows,futools,fuAbout,uHLs;
 type
   TacBase = class(TAction)
   protected
@@ -294,6 +294,7 @@ begin
   Caption :='Open...' ;
   dlgFileOpen := TOpenDialog.Create(Self);
   dlgFileOpen.Options :=  [ofAllowMultiSelect] + dlgFileOpen.Options;
+  dlgFileOpen.Filter := HLs.GetFilters ;
   ShortCut := Menus.ShortCut(Word('O'),[ssCtrl]);
 end;
 

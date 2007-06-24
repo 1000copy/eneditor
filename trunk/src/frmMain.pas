@@ -40,7 +40,8 @@ begin
   CmdLineOpenFiles(TRUE);
   if Self.pctrlMain.ActivePage = nil then
    GI_EditorFactory.DoOpenFile('');
-  Left := 100 ;Top :=100 ;Height := 600 ;Width  := 800 ;
+  Self.WindowState :=   wsMaximized ;
+  //Left := 100 ;Top :=100 ;Height := 600 ;Width  := 800 ;
 end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
