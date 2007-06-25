@@ -15,7 +15,7 @@
     procedure RemoveMRU(Filename : String);
     function GetMRUCount:Integer;
     function GetMRU (I:Integer): String; 
-  5. DONE @May 25,2007         Z
+  5. DONE @May 25,2007         
      Refactor : Merge IEdit.Close to IEditFactory.CloseEditor(FileName:String);  
 --------------May 22, 2007 --------------
 TASK
