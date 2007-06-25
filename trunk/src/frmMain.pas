@@ -23,7 +23,7 @@ type
     procedure OnBroadcase(inText: string ; inData : double ; inKey :integer) ;
   public
     function SendToWin(Str:String ;WindowName:string):Boolean;
-    procedure Mymessage(var t: TWmCopyData);message wm_copydata;
+    procedure Mymessage(var t: TWmCopyData);message WM_COPYDATA;
   protected
     function CmdLineOpenFiles(AMultipleFiles: boolean): boolean;
 
@@ -129,6 +129,7 @@ procedure TMainForm.FormActivate(Sender: TObject);
 var
   ret : Integer ;
 begin
+  
   {
   hmutex:=CreateMutex(nil,false,'enEditor');
   ret:=GetLastError ;
