@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls,uEditorConf;
+  Dialogs, StdCtrls,uEditorConf,StrUtils;
 
 type
   TfmTools = class(TForm)
@@ -33,7 +33,7 @@ procedure RunTools(AEditorConf : IXMLEnEditorType);
 implementation
 
 {$R *.dfm}
-uses fuToolProp ;
+uses fuToolProp ,uEditAppIntfs;
 
 procedure RunTools(AEditorConf : IXMLEnEditorType);
 var
@@ -88,14 +88,16 @@ end;
 procedure TfmTools.btnRunClick(Sender: TObject);
 var
   xmlTool : IXMLTooltype ;
-  a : String ;
+  argu ,a : String ;
   sl : TStringList ;
+
 begin
   if self.lst1.ItemIndex > -1 then begin
     sl := TStringList.Create ;
     try
-       xmlTool := FEditorConf.Tools.Tool[self.lst1.ItemIndex] ;
-      a := xmlTool.Cmd + ' ' +xmlTool.Argument ;
+      xmlTool := FEditorConf.Tools.Tool[self.lst1.ItemIndex] ;
+      argu :=  StringReplace(xmlTool.Argument,'$FileName$',GI_ActiveEditor.GetFileName +' ',[rfReplaceAll, rfIgnoreCase]);
+      a := xmlTool.Cmd + ' ' +argu ;
       sl.Add(a);
       sl.Add('Pause');
       sl.SaveToFile('a.bat');

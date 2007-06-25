@@ -8,7 +8,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Menus, ActnList, uEditAppIntfs, ComCtrls,uMRU,SynEditHighlighter,uAction,
-  ExtCtrls;
+  ExtCtrls,SyncObjs;
 
 type
   TMainForm = class(TForm)
@@ -149,17 +149,22 @@ procedure TMainForm.tmr1Timer(Sender: TObject);
 var
   tempfile : string;
   sl : TStringList ;i :Integer ;
+  cs : TCriticalSection ;
 begin
   tempfile := ExtractFilePath(ParamStr(0))+'\'+'templist.txt';
+  cs := TCriticalSection.Create ;
   if not FileExists(tempfile) then Exit ;
   sl := TStringList.Create ;
   try
+    cs.Enter ;
     sl.LoadFromFile(tempfile);
     for i := 0 to sl.Count -1 do
       GI_EditorFactory.DoOpenFile(sl.Strings[I]);
-    DeleteFile(tempfile)
+    DeleteFile(tempfile);
+    cs.Leave ;
   finally
     sl.free ;
+    cs.Free;
   end;
 end;
 
