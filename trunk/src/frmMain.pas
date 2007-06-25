@@ -7,7 +7,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  Menus, ActnList, uEditAppIntfs, ComCtrls,uMRU,SynEditHighlighter,uAction,Brdcast;
+  Menus, ActnList, uEditAppIntfs, ComCtrls,uMRU,SynEditHighlighter,uAction;
 
 type
   TMainForm = class(TForm)
@@ -19,7 +19,7 @@ type
     procedure pctrlMainChange(Sender: TObject);
     procedure FormActivate(Sender: TObject);
   private
-    hmutex : THandle ;
+    //hmutex : THandle ;
     procedure OnBroadcase(inText: string ; inData : double ; inKey :integer) ;
   public
     function SendToWin(Str:String ;WindowName:string):Boolean;
@@ -109,7 +109,7 @@ procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   Assert(GI_EditorFactory <> nil );
   CanClose := GI_EditorFactory.CanCloseAll;
-  releasemutex(hmutex);
+  //releasemutex(hmutex);
 end;
 
 procedure TMainForm.pctrlMainChange(Sender: TObject);
@@ -129,6 +129,7 @@ procedure TMainForm.FormActivate(Sender: TObject);
 var
   ret : Integer ;
 begin
+  {
   hmutex:=CreateMutex(nil,false,'enEditor');
   ret:=GetLastError ;
   if   ret = Error_Already_Exists   then begin
@@ -137,6 +138,7 @@ begin
     Application.Terminate ;
   end;
   Caption := 'enEditor';
+  }
 end;
 
 end.

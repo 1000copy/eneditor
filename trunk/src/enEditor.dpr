@@ -55,11 +55,13 @@
 
 program enEditor;
 
+
+
 uses
   Forms,
   Dialogs,
   Windows,
-  brdcast,
+  CheckPrevious,
   frmMain in 'frmMain.pas' {MainForm},
   uEditAppIntfs in 'uEditAppIntfs.pas',
   frmEditor in 'frmEditor.pas' {EditorForm},
@@ -80,22 +82,11 @@ var
   hmutex:hwnd;
   ret:integer;
 begin
-  Application.Initialize;
-  Application.CreateForm(TMainForm, MainForm);
-  Application.Run;
-//  hmutex:=CreateMutex(nil,false,'enEditor');
-//  ret:=GetLastError ;
-//  if   ret<>Error_Already_Exists   then
-//  begin
-//    Application.CreateForm(TMainForm, MainForm);
-//    Application.Run;
-//  end
-//  else
-//  begin
-//    //ShowMessage('程序已运行。');
-//    //releasemutex(hmutex);
-//  end;
-
+  if not CheckPrevious.RestoreIfRunning(Application.Handle, 1) then begin
+    Application.Initialize;
+    Application.CreateForm(TMainForm, MainForm);
+    Application.Run;
+  end;
 
 end.
 
