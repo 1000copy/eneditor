@@ -6,7 +6,7 @@ from :
 http://delphi.about.com/library/code/ncaa100703a.htm
 }
 
-uses Windows, SysUtils,Messages;
+uses Windows, SysUtils,Messages,classes,Dialogs;
 
 function RestoreIfRunning(const AppHandle : THandle; MaxInstances : integer = 1) : boolean;
 
@@ -45,6 +45,9 @@ begin
 end;
 
 function RestoreIfRunning(const AppHandle : THandle; MaxInstances : integer = 1) : boolean;
+var
+  sl :TStringList;
+  tempfile :string ;
 begin
   Result := True;
 
@@ -92,8 +95,23 @@ begin
           if IsIconic(InstanceInfo^.PreviousHandle) then
             ShowWindow(InstanceInfo^.PreviousHandle, SW_RESTORE);
           SetForegroundWindow(InstanceInfo^.PreviousHandle);
-          SendToWin(ParamStr(0),InstanceInfo^.PreviousHandle) ;// 发送WM_COPYDATA消息
-          //SendMessage (InstanceInfo^.PreviousHandle, WM_USER+1, 0,0) ;
+          //SendToWin(ParamStr(0),InstanceInfo^.PreviousHandle) ;// 发送WM_COPYDATA消息
+          sl := TStringList.Create ;
+          with  sl do
+          try
+            if ParamCount > 0 then begin
+              tempfile := ExtractFilePath(ParamStr(0))+'\'+'templist.txt';
+              //showMessage(tempfile);
+              if not FileExists(tempfile) then
+                SaveToFile(tempfile)
+              else
+                LoadFromFile(tempfile);
+              Add(ParamStr(1));
+              saveToFile(tempfile);
+            end;
+          finally
+            Free ;
+          end;
         end
         else
         begin
