@@ -7,17 +7,20 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  Menus, ActnList, uEditAppIntfs, ComCtrls,uMRU,SynEditHighlighter,uAction;
+  Menus, ActnList, uEditAppIntfs, ComCtrls,uMRU,SynEditHighlighter,uAction,
+  ExtCtrls;
 
 type
   TMainForm = class(TForm)
     StatusBar: TStatusBar;
     pctrlMain: TPageControl;
+    tmr1: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure pctrlMainChange(Sender: TObject);
     procedure FormActivate(Sender: TObject);
+    procedure tmr1Timer(Sender: TObject);
   private
     //hmutex : THandle ;
     procedure OnBroadcase(inText: string ; inData : double ; inKey :integer) ;
@@ -140,6 +143,24 @@ begin
   end;
   Caption := 'enEditor';
   }
+end;
+
+procedure TMainForm.tmr1Timer(Sender: TObject);
+var
+  tempfile : string;
+  sl : TStringList ;i :Integer ;
+begin
+  tempfile := ExtractFilePath(ParamStr(0))+'\'+'templist.txt';
+  if not FileExists(tempfile) then Exit ;
+  sl := TStringList.Create ;
+  try
+    sl.LoadFromFile(tempfile);
+    for i := 0 to sl.Count -1 do
+      GI_EditorFactory.DoOpenFile(sl.Strings[I]);
+    DeleteFile(tempfile)
+  finally
+    sl.free ;
+  end;
 end;
 
 end.
