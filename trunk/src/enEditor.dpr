@@ -61,7 +61,7 @@ uses
   Forms,
   Dialogs,
   Windows,
-  CheckPrevious,
+  ActiveX ,
   frmMain in 'frmMain.pas' {MainForm},
   uEditAppIntfs in 'uEditAppIntfs.pas',
   frmEditor in 'frmEditor.pas' {EditorForm},
@@ -75,9 +75,31 @@ uses
   uEditorConf in 'uEditorConf.pas',
   fuAbout in 'fuAbout.pas' {fmAbout},
   fuToolProp in 'fuToolProp.pas' {frmToolProp},
-  fuTextGene in 'fuTextGene.pas' {fmTextGene};
+  fuTextGene in 'fuTextGene.pas' {fmTextGene},
+  uCheckPrevious in 'uCheckPrevious.pas',
+  enEditor_TLB in 'enEditor_TLB.pas',
+  uCoEditorIntf in 'uCoEditorIntf.pas' {CoEditor: CoClass};
+
+{$R *.TLB}
 
 {$R *.RES}
+var
+  I : IcoEditor;
+begin
+  if not IsRunning(Application.Handle) then begin
+    Application.Initialize;
+    Application.CreateForm(TMainForm, MainForm);
+    Application.Run;
+  end else begin
+    CoInitialize(nil);
+    I := CoCoEditor.Create;
+    if ParamCount >= 1 then
+      I.OpenEditor(ParamStr(1));
+    CoUninitialize;
+  end;
+end.
+  {
+
 var
   hmutex:hwnd;
   ret:integer;
@@ -85,8 +107,7 @@ begin
   if not CheckPrevious.RestoreIfRunning(Application.Handle, 1) then begin
     Application.Initialize;
     Application.CreateForm(TMainForm, MainForm);
-    Application.Run;
+  Application.Run;
   end;
-
-end.
+end.}
 
