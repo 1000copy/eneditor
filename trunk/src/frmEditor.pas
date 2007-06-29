@@ -9,13 +9,12 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
   uEditAppIntfs, SynEdit, SynEditTypes, SynEditMiscProcs,uAction,ActnList,
   SynEditMiscClasses, SynEditSearch,ComCtrls ,uMRU,uEditorConf,uHLs,
-  Dialogs,SynEditHighlighter,fuTools,XMLDoc,XMLIntf, SynEditRegexSearch;
+  Dialogs,SynEditHighlighter,fuTools,XMLDoc,XMLIntf, SynEditRegexSearch,uSynWrapper;
 
 type
   TEditor = class;
 
   TEditorForm = class(TForm)
-    SynEditor: TSynEdit;
     pmnuEditor: TPopupMenu;
     lmiEditCut: TMenuItem;
     lmiEditCopy: TMenuItem;
@@ -26,8 +25,6 @@ type
     lmiEditUndo: TMenuItem;
     lmiEditRedo: TMenuItem;
     N2: TMenuItem;
-    SynEditSearch1: TSynEditSearch;
-    SynEditRegexSearch1: TSynEditRegexSearch;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormDestroy(Sender: TObject);
@@ -42,8 +39,10 @@ type
       var Action: TSynReplaceAction);
     procedure SynEditorStatusChange(Sender: TObject;
       Changes: TSynStatusChanges);
+    procedure FormCreate(Sender: TObject);
   private
     fEditor: TEditor;
+    SynEditor : TenSynEdit ;
   private
     fSearchFromCaret: boolean;
     function DoAskSaveChanges: boolean;
@@ -1042,10 +1041,7 @@ begin
     Include(Options, ssoSelectedOnly);
   if gbSearchWholeWords then
     Include(Options, ssoWholeWord);
-  if gbSearchRegexp then
-    SynEditor.SearchEngine := SynEditRegexSearch1
-  else
-    SynEditor.SearchEngine := SynEditSearch1 ;
+  SynEditor.UseRegexp := gbSearchRegexp ;
   if SynEditor.SearchReplace(gsSearchText, gsReplaceText, Options) = 0 then
   begin
     MessageBeep(MB_ICONASTERISK);
@@ -1297,6 +1293,16 @@ end;
 procedure TEditorFactory.RunToolsConf;
 begin
   RunTools(Self.FEditorConf);
+end;
+
+procedure TEditorForm.FormCreate(Sender: TObject);
+begin
+  SynEditor := TenSynEdit.Create(self);
+  SynEditor.OnEnter :=  SynEditorEnter ;
+  SynEditor.OnChange :=  SynEditorChange ;
+  SynEditor.OnExit :=  SynEditorExit ;
+  SynEditor.OnReplaceText :=  SynEditorReplaceText ;
+  SynEditor.PopupMenu := Self.pmnuEditor ;
 end;
 
 end.
