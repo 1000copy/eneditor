@@ -12,8 +12,6 @@ uses
   Dialogs,SynEditHighlighter,fuTools,XMLDoc,XMLIntf, SynEditRegexSearch;
 
 type
-  TEditorKind = (ekBorderless, ekInTabsheet, ekMDIChild);
-
   TEditor = class;
 
   TEditorForm = class(TForm)
@@ -46,7 +44,6 @@ type
       Changes: TSynStatusChanges);
   private
     fEditor: TEditor;
-    fKind: TEditorKind;
   private
     fSearchFromCaret: boolean;
     function DoAskSaveChanges: boolean;
@@ -182,10 +179,10 @@ type
   end;
   implementation
 
+uses frmMain, dlgConfirmReplace,dlgSearchText,dlgReplaceText;
+
 {$R *.DFM}
 
-uses
-   dlgSearchText, dlgReplaceText, dlgConfirmReplace, frmMain;
 
 
 var
@@ -840,12 +837,8 @@ end;
 
 procedure TEditorForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  if fKind = ekInTabSheet then begin
-    //PostMessage(Parent.Handle, WM_DELETETHIS, 0, 0);
-    SendMessage(Parent.Handle, WM_DELETETHIS, 0, 0);
-    Action := caNone;
-  end else
-    Action := caFree;
+  SendMessage(Parent.Handle, WM_DELETETHIS, 0, 0);
+  Action := caNone;
 end;
 
 procedure TEditorForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -1069,16 +1062,11 @@ end;
 
 procedure TEditorForm.DoUpdateCaption;
 begin
-  Assert(fEditor <> nil);
-  case fKind of
-    ekInTabsheet:
-       if fEditor.GetModified then
-         (Parent as TTabSheet).Caption := '*'+fEditor.GetFileTitle
-       else
-         (Parent as TTabSheet).Caption := fEditor.GetFileTitle;
-    ekMDIChild:
-      Caption := fEditor.GetFileTitle + ' - ' + SEditorCaption;
-  end;
+   Assert(fEditor <> nil);
+   if fEditor.GetModified then
+     (Parent as TTabSheet).Caption := '*'+fEditor.GetFileTitle
+   else
+     (Parent as TTabSheet).Caption := fEditor.GetFileTitle;
 end;
 
 procedure TEditorForm.DoUpdateHighlighter;
@@ -1226,7 +1214,6 @@ procedure TEditorFactory.DoOpenFile(AFileName: string);
         fEditor := TEditor.Create(LForm);
         Sheet.FEditIntf  := fEditor ;
         Result := fEditor;
-        fKind := ekInTabsheet;
         BorderStyle := bsNone;
         Parent := Sheet;
         Align := alClient;
