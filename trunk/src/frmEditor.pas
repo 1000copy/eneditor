@@ -32,13 +32,6 @@ type
     procedure FormActivate(Sender: TObject);
     procedure FormDeactivate(Sender: TObject);
     procedure SynEditorChange(Sender: TObject);
-//    procedure SynEditorEnter(Sender: TObject);
-//    procedure SynEditorExit(Sender: TObject);
-//    procedure SynEditorReplaceText(Sender: TObject; const ASearch,
-//      AReplace: String; Line, Column: Integer;
-//      var Action: TSynReplaceAction);
-//    procedure SynEditorStatusChange(Sender: TObject;
-//      Changes: TSynStatusChanges);
     procedure FormCreate(Sender: TObject);
   private
     fEditor: TEditor;
@@ -65,6 +58,13 @@ type
   TEditor = class(TInterfacedObject, IEditor, IEditCommands, IFileCommands,
     ISearchCommands)
   private
+    fFileName: string;
+    fForm: TEditorForm;
+    fHasSelection: boolean;
+    fIsEmpty: boolean;
+    fIsReadOnly: boolean;
+    fModified: boolean;
+    fUntitledNumber: integer;
     // IEditor implementation
     procedure Activate;
     function AskSaveChanges: boolean;
@@ -108,14 +108,7 @@ type
     procedure ExecFindNext;
     procedure ExecFindPrev;
     procedure ExecReplace;
-  private
-    fFileName: string;
-    fForm: TEditorForm;
-    fHasSelection: boolean;
-    fIsEmpty: boolean;
-    fIsReadOnly: boolean;
-    fModified: boolean;
-    fUntitledNumber: integer;
+  public
     constructor Create(AForm: TEditorForm);
     procedure DoSetFileName(AFileName: string);
     procedure SetFont(Font :TFont);overload ;
@@ -936,15 +929,7 @@ begin
   DoUpdateCaption ;
 end;
 
-//procedure TEditorForm.SynEditorEnter(Sender: TObject);
-//begin
-//  DoAssignInterfacePointer(TRUE);
-//end;
-//
-//procedure TEditorForm.SynEditorExit(Sender: TObject);
-//begin
-//  DoAssignInterfacePointer(FALSE);
-//end;
+
 
 procedure TEditorForm.GetCoord(const Line, Column: Integer;var APos: TPoint;var EditRect: TRect);
 begin
@@ -953,34 +938,17 @@ begin
   EditRect.TopLeft := ClientToScreen(EditRect.TopLeft);
   EditRect.BottomRight := ClientToScreen(EditRect.BottomRight);
 end;
-{
-procedure TEditorForm.SynEditorStatusChange(Sender: TObject;
-  Changes: TSynStatusChanges);
-begin
-  Assert(fEditor <> nil);
-  if Changes * [scAll, scSelection] <> [] then
-    fEditor.fHasSelection := SynEditor.SelAvail;
-  if Changes * [scAll, scSelection] <> [] then
-    fEditor.fIsReadOnly := SynEditor.ReadOnly;
-  if Changes * [scAll, scModified] <> [] then
-    fEditor.fModified := SynEditor.Modified;
-end;
-}
+
 procedure TEditorForm.DoActivate;
 var
   Sheet: TTabSheet;
   PCtrl: TPageControl;
 begin
-  if FormStyle = fsMDIChild then
-    BringToFront
-  else if Parent is TTabSheet then begin
-    Sheet := TTabSheet(Parent);
-    PCtrl := Sheet.PageControl;
-    if PCtrl <> nil then
-      PCtrl.ActivePage := Sheet;
-    // 我认为这里不应该SetFocus  
-    //SetFocus;
-  end;
+  Sheet := TTabSheet(Parent);
+  PCtrl := Sheet.PageControl;
+  Assert(PCtrl <> nil );
+  PCtrl.ActivePage := Sheet;
+  // 我认为这里不应该SetFocus  //SetFocus;
 end;
 
 function TEditorForm.DoAskSaveChanges: boolean;
