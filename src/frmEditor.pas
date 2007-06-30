@@ -7,9 +7,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
-  uEditAppIntfs, SynEdit, SynEditTypes, SynEditMiscProcs,uAction,ActnList,
-  SynEditMiscClasses, SynEditSearch,ComCtrls ,uMRU,uEditorConf,uHLs,
-  Dialogs,SynEditHighlighter,fuTools,XMLDoc,XMLIntf, SynEditRegexSearch,uSynWrapper;
+  uEditAppIntfs, uAction,ActnList,
+  ComCtrls ,uMRU,uEditorConf,uHLs,
+  Dialogs,fuTools,XMLDoc,XMLIntf, uSynWrapper,SynEdit;
 
 type
   TEditor = class;
@@ -34,17 +34,19 @@ type
     procedure SynEditorChange(Sender: TObject);
     procedure SynEditorEnter(Sender: TObject);
     procedure SynEditorExit(Sender: TObject);
-    procedure SynEditorReplaceText(Sender: TObject; const ASearch,
-      AReplace: String; Line, Column: Integer;
-      var Action: TSynReplaceAction);
+//    procedure SynEditorReplaceText(Sender: TObject; const ASearch,
+//      AReplace: String; Line, Column: Integer;
+//      var Action: TSynReplaceAction);
     procedure SynEditorStatusChange(Sender: TObject;
       Changes: TSynStatusChanges);
     procedure FormCreate(Sender: TObject);
   private
     fEditor: TEditor;
     SynEditor : TenSynEdit ;
-  private
     fSearchFromCaret: boolean;
+    procedure GetCoord(const Line, Column: Integer; var APos: TPoint;
+      var EditRect: TRect);
+  private                     
     function DoAskSaveChanges: boolean;
     procedure DoAssignInterfacePointer(AActive: boolean);
     function DoSave: boolean;
@@ -57,6 +59,7 @@ type
   public
     procedure DoActivate;
     property EditorIntf: TEditor read fEditor ;
+    constructor Create(AOwner :TComponent);override ;
   end;
 
   TEditor = class(TInterfacedObject, IEditor, IEditCommands, IFileCommands,
@@ -126,11 +129,17 @@ const
 type
   TEditorTabSheet = class(TTabSheet)
   private
-    FEditIntf : IEditor ;
+    FForm : TEditorForm;
     procedure WMDeleteThis(var Msg: TMessage);
       message WM_DELETETHIS;
+    function GetEditIntf: IEditor;
   public
-    property EditIntf : IEditor read FEditIntf ;
+    constructor Create (AOwner: TComponent);override;
+    property LForm : TEditorForm read FForm ;
+    property EditIntf : IEditor  read GetEditIntf ;
+    procedure SetFont(FontName:string;FontSize : Integer );
+    procedure OpenFile(AFilename:String);
+
   end;
 { TEditorFactory }
 
@@ -143,6 +152,9 @@ type
     FFont : TFont ;
     FPageControl : TPageControl ;
     FXMLDoc : TXMLDocument ;
+    fEditors: TInterfaceList;
+    fUntitledNumbers: TBits;
+    mRecentFiles,mRecentFolders : TMenuItem ;
     function CanCloseAll: boolean;
     procedure CloseAll;
     function GetEditorCount: integer;
@@ -153,17 +165,8 @@ type
     procedure InitMenu;
     procedure OnOpenMRUFile(Sender: TObject; const FileName: String);
     procedure OnOpenMRUFolders(Sender: TObject; const AFileName: String);
-    function GetSaveFileName(var ANewName: string;
-      AHighlighter: TSynCustomHighlighter): boolean;
-  private
-    fEditors: TInterfaceList;
-    fUntitledNumbers: TBits;
-    mRecentFiles,mRecentFolders : TMenuItem ;
-    dlgFileOpen : TOpenDialog ;
-    dlgFileSave : TSaveDialog ;
-  public
-    constructor Create (APageControl:TPageControl);
-    destructor Destroy; override;
+    //function GetSaveFileName(var ANewName: string;AHighlighter: TSynCustomHighlighter): boolean;
+    function GetSaveFileName(var ANewName: string;DefaultFilters :String): boolean;
     procedure CloseEditor ;
     procedure SetFont(Font :TFont);overload;
     procedure AddMRU(Filename : String);
@@ -175,8 +178,12 @@ type
     procedure AskEnable ;
     function GetEditConf :IXMLEnEditorType;
     procedure RunToolsConf ;
+  public
+    constructor Create (APageControl:TPageControl);
+    destructor Destroy; override;
   end;
-  implementation
+  
+implementation
 
 uses frmMain, dlgConfirmReplace,dlgSearchText,dlgReplaceText;
 
@@ -238,9 +245,21 @@ begin
 end;
 
 procedure TEditor.Close;
+var
+  fUntitledNumber : Integer ;
+  FileName :String;
 begin
-  if fForm <> nil then
+  if fForm <> nil then begin
+    FileName := GetFileName ;
+    if (FileName <> '') then
+        GI_EditorFactory.AddMRU(FileName)
+    else begin
+      fUntitledNumber := GetUntitledNumber ;
+      if fUntitledNumber <> -1 then
+        GI_EditorFactory.ReleaseUntitledNumber(fUntitledNumber);
+    end;
     fForm.Close;
+  end;
 end;
 
 procedure TEditor.DoSetFileName(AFileName: string);
@@ -513,6 +532,30 @@ end;
 { TEditorTabSheet }
 
 
+constructor TEditorTabSheet.Create(AOwner: TComponent);
+begin
+  inherited;
+  PageControl := TPageControl(AOwner);
+  FForm := TEditorForm.Create(Self);
+  PageControl.ActivePage := Self;
+  GI_ActiveEditor := EditIntf ;
+end;
+
+function TEditorTabSheet.GetEditIntf: IEditor;
+begin
+  Result := LForm.fEditor;
+end;
+
+procedure TEditorTabSheet.OpenFile(AFilename: String);
+begin
+  EditIntf.OpenFile(AFileName);
+end;
+
+procedure TEditorTabSheet.SetFont(FontName: string; FontSize: Integer);
+begin
+  EditIntf.SetFont(FontName,FontSize);
+end;
+
 procedure TEditorTabSheet.WMDeleteThis(var Msg: TMessage);
 begin
   Free;
@@ -533,14 +576,18 @@ procedure TEditorFactory.OnOpenMRUFolders(Sender: TObject; const AFileName: Stri
 var
   i: integer;
   s: string;
+  dlgFileOpen : TOpenDialog ;
 begin
-  with dlgFileOpen do begin
+  dlgFileOpen := TOpenDialog.Create(nil) ;
+  with dlgFileOpen do
+  try
     InitialDir := AFileName ;
     Options := Options + [ofAllowMultiSelect];
     if Execute then
       for I := 0 to Files.Count -1 do
         GI_EditorFactory.DoOpenFile(Files.Strings[I]);
-
+  finally
+    dlgFileOpen.Free ;
   end;
 end;
 constructor TEditorFactory.Create (APageControl:TPageControl);
@@ -571,16 +618,18 @@ begin
   FFont.Size := FEditorConf.Font.Size ;
   //FEditorConf.Tools.Tool[0].Title
   HLs := THLs.Create;
-  dlgFileOpen :=TOpenDialog.Create(nil);
-  dlgFileOpen.Filter :=  HLs.GetFilters ;
-  dlgFileSave :=TSaveDialog.Create(nil);
-  dlgFileSave.Filter :=  HLs.GetFilters ;
 
 end;
-function TEditorFactory.GetSaveFileName(var ANewName: string;
-  AHighlighter: TSynCustomHighlighter): boolean;
+//function TEditorFactory.GetSaveFileName(var ANewName: string;
+//  AHighlighter: TSynCustomHighlighter): boolean;
+function TEditorFactory.GetSaveFileName(var ANewName: string;DefaultFilters :String): boolean;
+var
+   dlgFileSave :TSaveDialog ;
 begin
-  with dlgFileSave do begin
+  dlgFileSave :=TSaveDialog.Create(nil);
+  dlgFileSave.Filter :=  HLs.GetFilters ;
+  with dlgFileSave do
+  try
     if ANewName <> '' then begin
       InitialDir := ExtractFileDir(ANewName);
       FileName := ExtractFileName(ANewName);
@@ -588,8 +637,9 @@ begin
       InitialDir := '';
       FileName := '';
     end;
-    if AHighlighter <> nil then
-      Filter := AHighlighter.DefaultFilter
+    //if AHighlighter <> nil then
+    if DefaultFilters <> '' then
+      Filter := DefaultFilters
     else
       Filter := HLs.GetFilters;
     if Execute then begin
@@ -597,6 +647,8 @@ begin
       Result := TRUE;
     end else
       Result := FALSE;
+  finally
+    dlgFileSave.Free ;
   end;
 end;
 procedure TEditorFactory.InitMenu;
@@ -758,8 +810,6 @@ destructor TEditorFactory.Destroy;
 begin
 //  Because FXMLDoc cast to a IXMLDocument ,so here must not be released 
 //  FXMLDoc.Free;
-  dlgFileSave.Free ;
-  dlgFileOpen.Free;
   FFont.Free ;
   fMRU.free ;
   fMRUFolders.Free ;
@@ -884,6 +934,14 @@ begin
   DoAssignInterfacePointer(FALSE);
 end;
 
+procedure TEditorForm.GetCoord(const Line, Column: Integer;var APos: TPoint;var EditRect: TRect);
+begin
+  APos := SynEditor.GetScreenPos(Column, Line);
+  EditRect := ClientRect;
+  EditRect.TopLeft := ClientToScreen(EditRect.TopLeft);
+  EditRect.BottomRight := ClientToScreen(EditRect.BottomRight);
+end;
+{
 procedure TEditorForm.SynEditorReplaceText(Sender: TObject; const ASearch,
   AReplace: String; Line, Column: Integer; var Action: TSynReplaceAction);
 var
@@ -893,14 +951,7 @@ begin
   if ASearch = AReplace then
     Action := raSkip
   else begin
-    APos := SynEditor.ClientToScreen(
-      SynEditor.RowColumnToPixels(
-      SynEditor.BufferToDisplayPos(
-      BufferCoord(Column, Line) ) ) );
-    EditRect := ClientRect;
-    EditRect.TopLeft := ClientToScreen(EditRect.TopLeft);
-    EditRect.BottomRight := ClientToScreen(EditRect.BottomRight);
-
+    GetCoord(Line, Column,APos,EditRect);
     if ConfirmReplaceDialog = nil then
       ConfirmReplaceDialog := TConfirmReplaceDialog.Create(Application);
     ConfirmReplaceDialog.PrepareShow(EditRect, APos.X, APos.Y,
@@ -913,7 +964,7 @@ begin
     end;
   end;
 end;
-
+}
 procedure TEditorForm.SynEditorStatusChange(Sender: TObject;
   Changes: TSynStatusChanges);
 begin
@@ -1013,7 +1064,7 @@ var
 begin
   Assert(fEditor <> nil);
   NewName := fEditor.fFileName;
-  if GI_EditorFactory.GetSaveFileName(NewName, SynEditor.Highlighter) then
+  if GI_EditorFactory.GetSaveFileName(NewName, SynEditor.DefaultFilter) then
   begin
     fEditor.DoSetFileName(NewName);
     DoUpdateCaption;
@@ -1025,28 +1076,18 @@ end;
 
 procedure TEditorForm.DoSearchReplaceText(AReplace: boolean;
   ABackwards: boolean);
-var
-  Options: TSynSearchOptions;
 begin
-  if AReplace then
-    Options := [ssoPrompt, ssoReplace, ssoReplaceAll]
-  else
-    Options := [];
-  if ABackwards then
-    Include(Options, ssoBackwards);
-  if gbSearchCaseSensitive then
-    Include(Options, ssoMatchCase);
-  if not fSearchFromCaret then
-    Include(Options, ssoEntireScope);
-  if gbSearchSelectionOnly then
-    Include(Options, ssoSelectedOnly);
-  if gbSearchWholeWords then
-    Include(Options, ssoWholeWord);
-  SynEditor.UseRegexp := gbSearchRegexp ;
-  if SynEditor.SearchReplace(gsSearchText, gsReplaceText, Options) = 0 then
+  if  0 = SynEditor.DoSearchReplace (
+      gsSearchText, gsReplaceText,
+      AReplace,ABackwards,
+      gbSearchCaseSensitive,
+      fSearchFromCaret,gbSearchSelectionOnly,
+      gbSearchWholeWords,gbSearchRegexp) then
   begin
     MessageBeep(MB_ICONASTERISK);
-    if ssoBackwards in Options then
+    if ABackwards then
+    // 等效 ：
+    //if ssoBackwards in Options then
       SynEditor.BlockEnd := SynEditor.BlockBegin
     else
       SynEditor.BlockBegin := SynEditor.BlockEnd;
@@ -1137,25 +1178,16 @@ var
   FileName : String;
 begin
   I := fEditors.IndexOf(GI_ActiveEditor);
-  if I <> -1 then begin
-    FileName := GI_ActiveEditor.GetFileName ;
-    if (FileName <> '') then
-        AddMRU(FileName)
-    else begin
-      fUntitledNumber := GI_ActiveEditor.GetUntitledNumber ;
-      if fUntitledNumber <> -1 then
-        ReleaseUntitledNumber(fUntitledNumber);
-    end;
-    GI_ActiveEditor.Close;
-    if I > 0 then
-      GI_ActiveEditor := GetEditor(I -1 )
-    else if I < GetEditorCount then
-      GI_ActiveEditor := GetEditor(I);
-    if  GI_ActiveEditor <> nil then
-      GI_ActiveEditor.Activate ;
-    if MainForm.pctrlMain.ActivePage = nil then
-      MainForm.Close ;
-  end;
+  Assert(I > -1 );
+  GI_ActiveEditor.Close;
+  if I > 0 then
+    GI_ActiveEditor := GetEditor(I -1 )
+  else if I < GetEditorCount then
+    GI_ActiveEditor := GetEditor(I);
+  if  GI_ActiveEditor <> nil then
+    GI_ActiveEditor.Activate
+  else
+    MainForm.Close ;
 end;
 
 
@@ -1198,65 +1230,33 @@ begin
 end;
 
 procedure TEditorFactory.DoOpenFile(AFileName: string);
-  function CreateEditor(AFileName : String): IEditor;
-  var
-    Sheet: TEditorTabSheet;
-    LForm: TEditorForm;
-  begin
-    Sheet := TEditorTabSheet.Create(FPageControl);
-    try
-      Sheet.PageControl := FPageControl;
-      LForm := TEditorForm.Create(Sheet);
-      with LForm do begin
-        fEditor := TEditor.Create(LForm);
-        Sheet.FEditIntf  := fEditor ;
-        Result := fEditor;
-        BorderStyle := bsNone;
-        Parent := Sheet;
-        Align := alClient;
-        Visible := TRUE;
-        FPageControl.ActivePage := Sheet;
-        //这里也不应该setFocus
-        //LForm.SetFocus;
-        GI_ActiveEditor := fEditor ;
-        fEditor.SetFont(FEditorConf.Font.Name,FEditorConf.Font.Size);
-        fEditor.OpenFile(AFileName);
-        Result := fEditor ;
-      end;
-      // fix for Delphi 4 (???)
-      LForm.Realign;
-      if Result <> nil then
-        fEditors.Add(Result);
-    except
-      Sheet.Free;
-    end;
-  end;
-  function GetEditorByFile(FileName : string ): IEditor ;
-  var i : integer ;
-  var Editor : IEditor ;
-  begin
-    if AFileName ='' then begin
-      Result := nil;
-      Exit ;
-    end;
-    for i := GetEditorCount - 1 downto 0 do begin
-      Editor := GetEditor(i);
-      if CompareText(Editor.GetFileName, AFileName) = 0 then begin
-        Result := Editor ;
-        Break ;
-      end;
-    end;       
-  end;
-var  Editor: IEditor;
+var
+  i : integer ;
+  Editor,ResultEditor : IEditor ;
+  Sheet: TEditorTabSheet;
 begin
   Assert(GI_EditorFactory <> nil);
   AFileName := ExpandFileName(AFileName);
-  if AFileName <> '' then 
+  if AFileName <> '' then
     RemoveMRU(AFileName);
-  Editor := GetEditorByFile(AFileName) ;
-  if not Assigned(Editor) then
-    Editor := CreateEditor(AFileName);
-  Editor.Activate;
+  if AFileName <>'' then begin
+    for i := GetEditorCount - 1 downto 0 do begin
+      Editor := GetEditor(i);
+      if CompareText(Editor.GetFileName, AFileName) = 0 then begin
+        ResultEditor := Editor ;
+        Break ;
+      end;
+    end;
+  end;
+  if not Assigned(ResultEditor) then begin
+      Sheet := TEditorTabSheet.Create(FPageControl);
+      ResultEditor := Sheet.EditIntf ;
+      Sheet.SetFont(FEditorConf.Font.Name,FEditorConf.Font.Size);
+      Sheet.OpenFile(AFileName);
+      Assert(ResultEditor <> nil );
+      fEditors.Add(ResultEditor);
+  end;
+  ResultEditor.Activate ;
 end;
 
 function TEditorFactory.GetUntitledNumber: integer;
@@ -1303,8 +1303,21 @@ begin
   SynEditor.OnEnter :=  SynEditorEnter ;
   SynEditor.OnChange :=  SynEditorChange ;
   SynEditor.OnExit :=  SynEditorExit ;
-  SynEditor.OnReplaceText :=  SynEditorReplaceText ;
+  //SynEditor.OnReplaceText :=  SynEditorReplaceText ;
+  SynEditor.OnCalcCoord := GetCoord;
+  SynEditor.OnReplaceText :=  SynEditor.SynEditorReplaceText;
   SynEditor.PopupMenu := Self.pmnuEditor ;
+  SynEditor.OnStatusChange := self.SynEditorStatusChange;
+end;
+
+constructor TEditorForm.Create(AOwner: TComponent);
+begin
+  inherited;
+  BorderStyle := bsNone;
+  Parent := TEditorTabSheet(AOwner);
+  Align := alClient;
+  Visible := TRUE;
+  fEditor := TEditor.Create(Self);
 end;
 
 end.

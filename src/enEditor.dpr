@@ -61,7 +61,7 @@ uses
   Forms,
   Dialogs,
   Windows,
-  ActiveX ,
+  ActiveX,
   frmMain in 'frmMain.pas' {MainForm},
   uEditAppIntfs in 'uEditAppIntfs.pas',
   frmEditor in 'frmEditor.pas' {EditorForm},
@@ -78,7 +78,8 @@ uses
   fuTextGene in 'fuTextGene.pas' {fmTextGene},
   uCheckPrevious in 'uCheckPrevious.pas',
   enEditor_TLB in 'enEditor_TLB.pas',
-  uCoEditorIntf in 'uCoEditorIntf.pas' {CoEditor: CoClass};
+  uCoEditorIntf in 'uCoEditorIntf.pas' {CoEditor: CoClass},
+  uSynWrapper in 'uSynWrapper.pas';
 
 {$R *.TLB}
 
@@ -89,7 +90,7 @@ begin
   if not IsRunning(Application.Handle) then begin
     Application.Initialize;
     Application.CreateForm(TMainForm, MainForm);
-    Application.Run;
+  Application.Run;
   end else begin
     CoInitialize(nil);
     I := CoCoEditor.Create;
@@ -98,16 +99,4 @@ begin
     CoUninitialize;
   end;
 end.
-  {
-
-var
-  hmutex:hwnd;
-  ret:integer;
-begin
-  if not CheckPrevious.RestoreIfRunning(Application.Handle, 1) then begin
-    Application.Initialize;
-    Application.CreateForm(TMainForm, MainForm);
-  Application.Run;
-  end;
-end.}
 

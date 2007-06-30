@@ -21,11 +21,13 @@ type
     function GetModified: boolean;
     procedure OpenFile(AFileName: string);
     procedure SetFont(Font :TFont);overload ;
+    procedure SetFont(FontName : String;FontSize :Integer);overload ;
     function  GetUntitledNumber : Integer ;
     function  GetStrings: TStrings ;
   end;
 
   IEditorFactory = interface
+    procedure AddMRU(Filename : String);
     function CanCloseAll: boolean;
     procedure CloseAll;
     function GetEditorCount: integer;
@@ -40,7 +42,8 @@ type
     function GetUntitledNumber: integer;
     procedure ReleaseUntitledNumber(ANumber: integer);
     procedure AskEnable ;
-    function GetSaveFileName(var ANewName: string;AHighlighter: TSynCustomHighlighter): boolean;
+    //function GetSaveFileName(var ANewName: string;AHighlighter: TSynCustomHighlighter): boolean;
+    function GetSaveFileName(var ANewName: string;DefaultFilters :String): boolean;
     function GetEditConf :IXMLEnEditorType;
     procedure RunToolsConf ;
   end;

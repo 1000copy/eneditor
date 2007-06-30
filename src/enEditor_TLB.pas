@@ -12,17 +12,16 @@ unit enEditor_TLB;
 // ************************************************************************ //
 
 // PASTLWTR : 1.2
-// File generated on 2007-06-27 00:25:13 from Type Library described below.
+// File generated on 2007-6-30 ÏÂÎç 09:36:22 from Type Library described below.
 
 // ************************************************************************  //
-// Type Lib: E:\codestock\eneditor\src\enEditor.tlb (1)
+// Type Lib: e:\codestock\eneditor\src\enEditor.tlb (1)
 // LIBID: {8E9C76D5-68EF-437B-A657-BE224F2423E1}
 // LCID: 0
 // Helpfile: 
 // HelpString: enEditor Library
 // DepndLst: 
 //   (1) v2.0 stdole, (C:\WINDOWS\system32\stdole2.tlb)
-//   (2) v4.0 StdVCL, (C:\WINDOWS\system32\stdvcl40.dll)
 // ************************************************************************ //
 {$TYPEDADDRESS OFF} // Unit must be compiled without type-checked pointers. 
 {$WARN SYMBOL_PLATFORM OFF}
