@@ -938,7 +938,8 @@ begin
     PCtrl := Sheet.PageControl;
     if PCtrl <> nil then
       PCtrl.ActivePage := Sheet;
-    SetFocus;
+    // 我认为这里不应该SetFocus  
+    //SetFocus;
   end;
 end;
 
@@ -1215,7 +1216,8 @@ procedure TEditorFactory.DoOpenFile(AFileName: string);
         Align := alClient;
         Visible := TRUE;
         FPageControl.ActivePage := Sheet;
-        LForm.SetFocus;
+        //这里也不应该setFocus
+        //LForm.SetFocus;
         GI_ActiveEditor := fEditor ;
         fEditor.SetFont(FEditorConf.Font.Name,FEditorConf.Font.Size);
         fEditor.OpenFile(AFileName);
