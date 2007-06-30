@@ -9,7 +9,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
   uEditAppIntfs, uAction,ActnList,
   ComCtrls ,uMRU,uEditorConf,uHLs,
-  Dialogs,fuTools,XMLDoc,XMLIntf, uSynWrapper,SynEdit;
+  Dialogs,fuTools, uSynWrapper,XMLDoc,XMLIntf;
 
 type
   TEditor = class;
@@ -32,13 +32,13 @@ type
     procedure FormActivate(Sender: TObject);
     procedure FormDeactivate(Sender: TObject);
     procedure SynEditorChange(Sender: TObject);
-    procedure SynEditorEnter(Sender: TObject);
-    procedure SynEditorExit(Sender: TObject);
+//    procedure SynEditorEnter(Sender: TObject);
+//    procedure SynEditorExit(Sender: TObject);
 //    procedure SynEditorReplaceText(Sender: TObject; const ASearch,
 //      AReplace: String; Line, Column: Integer;
 //      var Action: TSynReplaceAction);
-    procedure SynEditorStatusChange(Sender: TObject;
-      Changes: TSynStatusChanges);
+//    procedure SynEditorStatusChange(Sender: TObject;
+//      Changes: TSynStatusChanges);
     procedure FormCreate(Sender: TObject);
   private
     fEditor: TEditor;
@@ -122,6 +122,9 @@ type
     procedure SetFont(FontName : String;FontSize :Integer);overload ;
     function  GetUntitledNumber : Integer ;
     function  GetStrings: TStrings ;
+    procedure SetHasSelection (B : Boolean );
+    procedure SetIsReadOnly (B : Boolean );
+    procedure SetModified (B : Boolean );
   end;
 const
   WM_DELETETHIS  =  WM_USER + 42;
@@ -529,6 +532,21 @@ begin
   Result := Self.fForm.SynEditor.Lines ;
 end;
 
+procedure TEditor.SetHasSelection(B: Boolean);
+begin
+  fHasSelection := B ;
+end;
+
+procedure TEditor.SetIsReadOnly(B: Boolean);
+begin
+  fIsReadOnly := B ;
+end;
+
+procedure TEditor.SetModified(B: Boolean);
+begin
+  fModified := B ;
+end;
+
 { TEditorTabSheet }
 
 
@@ -914,25 +932,19 @@ var
   i: integer;
 begin
   Assert(fEditor <> nil);
-  Empty := TRUE;
-  for i := SynEditor.Lines.Count - 1 downto 0 do
-    if SynEditor.Lines[i] <> '' then begin
-      Empty := FALSE;
-      break;
-    end;
-  fEditor.fIsEmpty := Empty;
+  fEditor.fIsEmpty := SynEditor.IsEmpty ;
   DoUpdateCaption ;
 end;
 
-procedure TEditorForm.SynEditorEnter(Sender: TObject);
-begin
-  DoAssignInterfacePointer(TRUE);
-end;
-
-procedure TEditorForm.SynEditorExit(Sender: TObject);
-begin
-  DoAssignInterfacePointer(FALSE);
-end;
+//procedure TEditorForm.SynEditorEnter(Sender: TObject);
+//begin
+//  DoAssignInterfacePointer(TRUE);
+//end;
+//
+//procedure TEditorForm.SynEditorExit(Sender: TObject);
+//begin
+//  DoAssignInterfacePointer(FALSE);
+//end;
 
 procedure TEditorForm.GetCoord(const Line, Column: Integer;var APos: TPoint;var EditRect: TRect);
 begin
@@ -942,29 +954,6 @@ begin
   EditRect.BottomRight := ClientToScreen(EditRect.BottomRight);
 end;
 {
-procedure TEditorForm.SynEditorReplaceText(Sender: TObject; const ASearch,
-  AReplace: String; Line, Column: Integer; var Action: TSynReplaceAction);
-var
-  APos: TPoint;
-  EditRect: TRect;
-begin
-  if ASearch = AReplace then
-    Action := raSkip
-  else begin
-    GetCoord(Line, Column,APos,EditRect);
-    if ConfirmReplaceDialog = nil then
-      ConfirmReplaceDialog := TConfirmReplaceDialog.Create(Application);
-    ConfirmReplaceDialog.PrepareShow(EditRect, APos.X, APos.Y,
-      APos.Y + SynEditor.LineHeight, ASearch);
-    case ConfirmReplaceDialog.ShowModal of
-      mrYes: Action := raReplace;
-      mrYesToAll: Action := raReplaceAll;
-      mrNo: Action := raSkip;
-      else Action := raCancel;
-    end;
-  end;
-end;
-}
 procedure TEditorForm.SynEditorStatusChange(Sender: TObject;
   Changes: TSynStatusChanges);
 begin
@@ -976,7 +965,7 @@ begin
   if Changes * [scAll, scModified] <> [] then
     fEditor.fModified := SynEditor.Modified;
 end;
-
+}
 procedure TEditorForm.DoActivate;
 var
   Sheet: TTabSheet;
@@ -1300,14 +1289,10 @@ end;
 procedure TEditorForm.FormCreate(Sender: TObject);
 begin
   SynEditor := TenSynEdit.Create(self);
-  SynEditor.OnEnter :=  SynEditorEnter ;
+  SynEditor.OnAssignInterface := DoAssignInterfacePointer ;
   SynEditor.OnChange :=  SynEditorChange ;
-  SynEditor.OnExit :=  SynEditorExit ;
-  //SynEditor.OnReplaceText :=  SynEditorReplaceText ;
   SynEditor.OnCalcCoord := GetCoord;
-  SynEditor.OnReplaceText :=  SynEditor.SynEditorReplaceText;
   SynEditor.PopupMenu := Self.pmnuEditor ;
-  SynEditor.OnStatusChange := self.SynEditorStatusChange;
 end;
 
 constructor TEditorForm.Create(AOwner: TComponent);

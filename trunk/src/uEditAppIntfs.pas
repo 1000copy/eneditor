@@ -24,6 +24,9 @@ type
     procedure SetFont(FontName : String;FontSize :Integer);overload ;
     function  GetUntitledNumber : Integer ;
     function  GetStrings: TStrings ;
+    procedure SetHasSelection (B : Boolean );
+    procedure SetIsReadOnly (B : Boolean );
+    procedure SetModified (B : Boolean );
   end;
 
   IEditorFactory = interface
