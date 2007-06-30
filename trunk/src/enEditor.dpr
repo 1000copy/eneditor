@@ -79,7 +79,8 @@ uses
   uCheckPrevious in 'uCheckPrevious.pas',
   enEditor_TLB in 'enEditor_TLB.pas',
   uCoEditorIntf in 'uCoEditorIntf.pas' {CoEditor: CoClass},
-  uSynWrapper in 'uSynWrapper.pas';
+  uSynWrapper in 'uSynWrapper.pas',
+  uConfig in 'uConfig.pas';
 
 {$R *.TLB}
 

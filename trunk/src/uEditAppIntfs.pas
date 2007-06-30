@@ -13,7 +13,7 @@ type
     procedure Activate;
     function AskSaveChanges: boolean;
     function CanClose: boolean;
-    procedure Close;
+    procedure CloseEditor;
     function GetCaretPos: TPoint;
     function GetEditorState: string;
     function GetFileName: string;
