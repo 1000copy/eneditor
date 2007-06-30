@@ -6,6 +6,7 @@ uses
   Controls,uEditAppIntfs,ComCtrls,Types,SynEditHighlighter,SynEditTypes,dlgConfirmReplace;
 type
   TGetCoord = procedure (const Line, Column: Integer;var APos: TPoint;var EditRect: TRect) of object ;
+  TDoAssignInterfacePointer = procedure (AActive: boolean) of object;
 type
    TenSynEdit = class(TSynEdit)
   private
@@ -13,13 +14,23 @@ type
     FSearch: TSynEditSearch;
     FRegExpSearch : TSynEditRegexSearch;
     FOnCalcCoord: TGetCoord;
+    FOnAssignInterfacePointer: TDoAssignInterfacePointer;
+    FIsEmpty: Boolean;
     procedure SetUseRegexp(const Value: Boolean);
     function GetDefaultFilter: string;
     procedure SetOnCalcCoord(const Value: TGetCoord);
-   public
+    procedure SynEditorStatusChange(Sender: TObject;
+      Changes: TSynStatusChanges);
     procedure SynEditorReplaceText(Sender: TObject; const ASearch,
       AReplace: String; Line, Column: Integer;
       var Action: TSynReplaceAction);
+    procedure SetOnAssignInterfacePointer(
+      const Value: TDoAssignInterfacePointer);
+    function GetIsEmpty: Boolean;
+    procedure SetIsEmpty(const Value: Boolean);
+   public
+    procedure SynEditorEnter(Sender: TObject);
+    procedure SynEditorExit(Sender: TObject);
      constructor Create(AOwner: TComponent); override;
      destructor Destroy ;override ;
      property UseRegexp : Boolean  read FUseRegexp write SetUseRegexp;
@@ -31,6 +42,8 @@ type
       gbSearchWholeWords,gbSearchRegexp:Boolean):Integer;
      property  DefaultFilter:string  read GetDefaultFilter;
      property OnCalcCoord : TGetCoord  read FOnCalcCoord write SetOnCalcCoord;
+     property OnAssignInterface : TDoAssignInterfacePointer  read FOnAssignInterfacePointer write SetOnAssignInterfacePointer;
+     property IsEmpty :Boolean  read GetIsEmpty ;
    end;
 
 implementation
@@ -55,6 +68,11 @@ begin
   // 下面这句话可以编译的，当然最后并没有创建对象。花费了一个晚上的时间，因为SynEdit报错 AV ，被牵着走了很久】
   // FRegExpSearch:= TSynEditRegexSearch(nil);
   SearchEngine := FSearch;
+  //  SynEditor.OnStatusChange := SynEditor.SynEditorStatusChange;
+  OnReplaceText :=  SynEditorReplaceText;
+  OnStatusChange := SynEditorStatusChange;
+  OnEnter :=  SynEditorEnter ;
+  OnExit :=  SynEditorExit ;
 end;
 
 destructor TenSynEdit.Destroy;
@@ -139,6 +157,52 @@ begin
       else Action := raCancel;
     end;
   end;
+end;
+procedure TenSynEdit.SynEditorStatusChange(Sender: TObject;
+  Changes: TSynStatusChanges);
+var
+  fEditor : IEditor ;
+begin    
+  fEditor := GI_ActiveEditor ;
+  Assert(fEditor <> nil);
+  if Changes * [scAll, scSelection] <> [] then
+    fEditor.SetHasSelection( SelAvail);
+  if Changes * [scAll, scSelection] <> [] then
+    fEditor.SetIsReadOnly(ReadOnly);
+  if Changes * [scAll, scModified] <> [] then
+    fEditor.SetModified (Modified);
+end;
+
+procedure TenSynEdit.SetOnAssignInterfacePointer(
+  const Value: TDoAssignInterfacePointer);
+begin
+  FOnAssignInterfacePointer := Value;
+end;
+procedure TenSynEdit.SynEditorEnter(Sender: TObject);
+begin
+  FOnAssignInterfacePointer(TRUE);
+end;
+
+procedure TenSynEdit.SynEditorExit(Sender: TObject);
+begin
+  FOnAssignInterfacePointer(FALSE);
+end;
+
+procedure TenSynEdit.SetIsEmpty(const Value: Boolean);
+begin
+  FIsEmpty := Value;
+end;
+
+function TenSynEdit.GetIsEmpty: Boolean;
+var
+  i : Integer ;
+begin
+  Result := TRUE;
+  for i := Lines.Count - 1 downto 0 do
+    if Lines[i] <> '' then begin
+      Result := FALSE;
+      break;
+    end;
 end;
 
 end.
