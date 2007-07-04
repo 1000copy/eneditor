@@ -19,14 +19,8 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure pctrlMainChange(Sender: TObject);
-    procedure FormActivate(Sender: TObject);
-    procedure tmr1Timer(Sender: TObject);
   private
     //hmutex : THandle ;
-    procedure OnBroadcase(inText: string ; inData : double ; inKey :integer) ;
-  public
-    function SendToWin(Str:String ;WindowName:string):Boolean;
-    procedure Mymessage(var t: TWmCopyData);message WM_COPYDATA;
   protected
     function CmdLineOpenFiles(AMultipleFiles: boolean): boolean;
 
@@ -43,33 +37,7 @@ implementation
 uses
   uEditorConf,IniFiles, frmEditor, uHLs;
 
-{ TMainForm }
-procedure TMainForm.Mymessage(var t: TWmCopyData);
-begin
-  ShowMessage(StrPas(t.CopyDataStruct^.lpData));
-  GI_EditorFactory.DoOpenFile(StrPas(t.CopyDataStruct^.lpData));
-end;
-function TMainForm.SendToWin(Str:String ;WindowName:string):Boolean;
-var
-  ds: TCopyDataStruct;
-  Hd : THandle;
-begin
-  ds.cbData := Length (Str) + 1;
-  GetMem (ds.lpData, ds.cbData ); //为传递的数据区分配内存
-  try
-    StrCopy (ds.lpData, PChar (Str));
-    Hd := FindWindow (nil, PChar(WindowName));
-    if Hd > 0 then begin
-      SendMessage (Hd, WM_COPYDATA, Handle,
-                   Cardinal(@ds)) ;// 发送WM_COPYDATA消息
-      Result := True;
-    end
-    else
-      Result := False ;
-  finally
-    FreeMem (ds.lpData); //释放资源
-  end;
-end;
+
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
   //InitMenu ;
@@ -112,7 +80,6 @@ procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   Assert(GI_EditorFactory <> nil );
   CanClose := GI_EditorFactory.CanCloseAll;
-  //releasemutex(hmutex);
 end;
 
 procedure TMainForm.pctrlMainChange(Sender: TObject);
@@ -120,53 +87,6 @@ begin
   GI_ActiveEditor := TEditorTabSheet(pctrlMain.ActivePage).EditIntf ;
 end;
 
-
-
-procedure TMainForm.OnBroadcase(inText: string; inData: double;
-  inKey: integer);
-begin
-  GI_EditorFactory.DoOpenFile(inText);
-end;
-
-procedure TMainForm.FormActivate(Sender: TObject);
-var
-  ret : Integer ;
-begin
-  
-  {
-  hmutex:=CreateMutex(nil,false,'enEditor');
-  ret:=GetLastError ;
-  if   ret = Error_Already_Exists   then begin
-    // 现在通过CopyData 总是不对，好像FindWindows找到的Window不是真正要的。
-    ShowMessage('enEditor 已经运行！');
-    Application.Terminate ;
-  end;
-  Caption := 'enEditor';
-  }
-end;
-
-procedure TMainForm.tmr1Timer(Sender: TObject);
-var
-  tempfile : string;
-  sl : TStringList ;i :Integer ;
-  cs : TCriticalSection ;
-begin
-  tempfile := ExtractFilePath(ParamStr(0))+'\'+'templist.txt';
-  cs := TCriticalSection.Create ;
-  if not FileExists(tempfile) then Exit ;
-  sl := TStringList.Create ;
-  try
-    cs.Enter ;
-    sl.LoadFromFile(tempfile);
-    for i := 0 to sl.Count -1 do
-      GI_EditorFactory.DoOpenFile(sl.Strings[I]);
-    DeleteFile(tempfile);
-    cs.Leave ;
-  finally
-    sl.free ;
-    cs.Free;
-  end;
-end;
 
 end.
 
