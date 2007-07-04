@@ -8,7 +8,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
   uEditAppIntfs, uAction,ActnList,
-  ComCtrls ,uMRU,uEditorConf,uHLs,
+  ComCtrls ,uMRU,uHLs,uEditorConf,
   Dialogs,fuTools, uSynWrapper,XMLDoc,XMLIntf;
 
 type
