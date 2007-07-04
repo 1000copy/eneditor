@@ -31,10 +31,8 @@ type
     function GetFilters : String ;
     function GetHighlighterForFile(AFileName: string): TSynCustomHighlighter;
   end;
-
 var
   HLs: THLs;
-
 implementation
 
 

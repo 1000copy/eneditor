@@ -809,6 +809,7 @@ begin
   fMRU.free ;
   fMRUFolders.Free ;
   fEditors.Free;
+  HLs.Free;
   inherited Destroy;
 end;
 
@@ -1245,6 +1246,13 @@ begin
   SynEditor.OnChange :=  SynEditorChange ;
   SynEditor.OnCalcCoord := GetCoord;
   SynEditor.PopupMenu := Self.pmnuEditor ;
+  Self.lmiEditCut.Action  := TacEditCut.Create(Self);
+  Self.lmiEditSelectAll.Action  := TacEditSelectAll.Create(Self);
+  Self.lmiEditRedo.Action  := TacEditRedo.Create(Self);
+  Self.lmiEditPaste.Action  := TacEditPaste.Create(Self);
+  Self.lmiEditDelete.Action  := TacEditDelete.Create(Self);
+  Self.lmiEditCopy.Action  := TacEditCopy.Create(Self);
+  Self.lmiEditUndo.Action  := TacEditUndo.Create(Self);
 end;
 
 constructor TEditorForm.Create(AOwner: TComponent);
