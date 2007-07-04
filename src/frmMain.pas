@@ -14,16 +14,12 @@ type
   TMainForm = class(TForm)
     StatusBar: TStatusBar;
     pctrlMain: TPageControl;
-    tmr1: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure pctrlMainChange(Sender: TObject);
-  private
-    //hmutex : THandle ;
   protected
     function CmdLineOpenFiles(AMultipleFiles: boolean): boolean;
-
   end;
 var
   MainForm : TMainForm ;
