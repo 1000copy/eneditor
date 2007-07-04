@@ -31,7 +31,7 @@ implementation
 {$R *.DFM}
 
 uses
-  uEditorConf,IniFiles, frmEditor, uHLs;
+  frmEditor;
 
 
 procedure TMainForm.FormCreate(Sender: TObject);
@@ -51,7 +51,7 @@ begin
   Assert(GI_EditorFactory <> nil );
   GI_EditorFactory.CloseAll;
   GI_EditorFactory := nil ;
-  HLs.Free;
+  
 end;
 
 
