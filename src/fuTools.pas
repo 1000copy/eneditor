@@ -90,25 +90,9 @@ end;
 procedure TfmTools.btnRunClick(Sender: TObject);
 var
   xmlTool : TenTool ;
-  argu ,a : String ;
-  sl : TStringList ;
-
 begin
-  if self.lst1.ItemIndex > -1 then begin
-    sl := TStringList.Create ;
-    try
-      xmlTool := FEditorConf.Tools.GetByIndex(self.lst1.ItemIndex) ;
-      argu :=  StringReplace(xmlTool.Argument,'$FileName$',GI_ActiveEditor.GetFileName +' ',[rfReplaceAll, rfIgnoreCase]);
-      a := xmlTool.Cmd + ' ' +argu ;
-      sl.Add(a);
-      sl.Add('Pause');
-      sl.SaveToFile('a.bat');
-      WinExec('a.bat',1) ;
-    finally
-      sl.Free ;
-      //DeleteFile('a.bat');
-    end;
-  end;
+  xmlTool := FEditorConf.Tools.GetByIndex(self.lst1.ItemIndex) ;
+  xmlTool.RunTool ;
 end;
 
 end.

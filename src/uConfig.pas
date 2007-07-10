@@ -3,7 +3,7 @@ unit uConfig;
 interface
 uses XMLDoc ,XMLIntf,
     classes,SysUtils
-    ,uEditorConf;
+    ,enEditorConf,Windows;
 type
   TenFont = class
   private
@@ -21,19 +21,24 @@ type
     FTitle: String;
     FInitDir: String;
     FCmd: String;
+    FExt: String;
     procedure SetArgument(const Value: String);
     procedure SetCmd(const Value: String);
     procedure SetInitDir(const Value: String);
     procedure SetTitle(const Value: String);
+    procedure SetExt(const Value: String);
   published
     property Title :String  read FTitle write SetTitle;
     property Cmd :String  read FCmd write SetCmd;
     property Argument :String  read FArgument write SetArgument;
     property InitDir :String  read FInitDir write SetInitDir;
+    property Ext :String   read FExt write SetExt;
+    function RunTool :Boolean;
   end;
 
   TenToolList = class(TList)
     function GetByIndex(I:Integer):TenTool ;
+    procedure RunTool ;
   end;
   TenConfig =class
   private
@@ -70,10 +75,45 @@ type
 implementation
 
 { TenToolList }
-
+uses uEditAppIntfs;
 function TenToolList.GetByIndex(I: Integer): TenTool;
 begin
   Result := TenTool(Get(I));
+end;
+
+function TenTool.RunTool :Boolean;
+var
+  argu ,a : String ;
+  sl : TStringList ;
+  ext : string ;
+begin
+  sl := TStringList.Create ;
+  try
+    ext := ExtractFileExt(GI_ActiveEditor.GetFileName) ;
+    if FExt[1] <> '.' then
+      Result := SameText(ext, '.'+FExt)
+    else
+      Result := SameText(ext, FExt);
+    if Result then begin
+      argu :=  StringReplace(FArgument,'$FileName$',GI_ActiveEditor.GetFileName +' ',[rfReplaceAll, rfIgnoreCase]);
+      a := Cmd + ' ' +argu ;
+      sl.Add(a);
+      sl.Add('Pause');
+      sl.SaveToFile('a.bat');
+      WinExec('a.bat',1) ;
+    end;
+  finally
+    sl.Free ;
+    //DeleteFile('a.bat');
+  end;
+end;
+procedure TenToolList.RunTool;
+var
+  i : Integer ;
+begin
+  for i := 0 to self.Count - 1 do
+    if GetByIndex(i).RunTool then
+      Break ;
 end;
 
 { TenConfig }
@@ -108,6 +148,7 @@ end;
 
 { TenTool }
 
+
 procedure TenTool.SetArgument(const Value: String);
 begin
   FArgument := Value;
@@ -116,6 +157,11 @@ end;
 procedure TenTool.SetCmd(const Value: String);
 begin
   FCmd := Value;
+end;
+
+procedure TenTool.SetExt(const Value: String);
+begin
+  FExt := Value;
 end;
 
 procedure TenTool.SetInitDir(const Value: String);
@@ -170,6 +216,7 @@ begin
      Tool.Cmd := FXmlEnConfig.Tools[i].cmd;
      Tool.Argument := FXmlEnConfig.Tools[i].Argument;
      Tool.InitDir := FXmlEnConfig.Tools[i].InitDir ;
+     Tool.Ext := FXmlEnConfig.Tools[i].ext ;
      FTools.Add(Tool);
   end;
 end;
@@ -188,6 +235,7 @@ begin
      FXmlEnConfig.Tools[i].cmd := Tool.Cmd;
      FXmlEnConfig.Tools[i].Argument := Tool.Argument;
      FXmlEnConfig.Tools[i].InitDir := Tool.InitDir ;
+     FXmlEnConfig.Tools[i].Ext := Tool.Ext ;
   end;
 
   FXmlEnConfig.OwnerDocument.SaveToFile(FFilename);

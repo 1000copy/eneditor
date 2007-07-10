@@ -794,6 +794,10 @@ begin
   mi := TMenuItem.Create(MainMenu) ;
   mTools.add(mi);
   mi.Action := TacToolsTextFormattor.Create(MainForm) ;
+  // Run Script
+  mi := TMenuItem.Create(MainMenu) ;
+  mTools.add(mi);
+  mi.Action := TacToolsRunScript.Create(MainForm) ;
   // Help
   mHelp := TMenuItem.Create(MainMenu) ;
   mHelp.Action := TacOnlyUpdate.Create(MainForm) ;

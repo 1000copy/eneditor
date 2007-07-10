@@ -2,7 +2,7 @@ object frmToolProp: TfrmToolProp
   Left = 367
   Top = 455
   Width = 312
-  Height = 260
+  Height = 307
   Caption = 'frmToolProp'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -41,6 +41,13 @@ object frmToolProp: TfrmToolProp
     Height = 16
     Caption = 'Init directory'
   end
+  object Label3: TLabel
+    Left = 19
+    Top = 184
+    Width = 43
+    Height = 16
+    Caption = 'File Ext'
+  end
   object edtTitle: TEdit
     Left = 96
     Top = 24
@@ -75,7 +82,7 @@ object frmToolProp: TfrmToolProp
   end
   object btnOK: TButton
     Left = 96
-    Top = 184
+    Top = 224
     Width = 75
     Height = 25
     Caption = 'OK'
@@ -84,11 +91,19 @@ object frmToolProp: TfrmToolProp
   end
   object btnCancel: TButton
     Left = 208
-    Top = 183
+    Top = 223
     Width = 75
     Height = 25
     Caption = 'Cancel'
     ModalResult = 2
     TabOrder = 5
+  end
+  object edtExt: TEdit
+    Left = 96
+    Top = 184
+    Width = 169
+    Height = 24
+    TabOrder = 6
+    Text = 'edtExt'
   end
 end

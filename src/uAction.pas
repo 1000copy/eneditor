@@ -218,7 +218,13 @@ type
   public
     constructor Create(Owner : TComponent);override;
   end;
-
+  TacToolsRunScript=class(TacBase)
+  protected
+    procedure Update(Sender: TObject);override ;
+    procedure Execute(Sender: TObject);override ;
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
 implementation
 uses frmMain;
 { TacBase }
@@ -848,6 +854,28 @@ begin
 end;
 
 procedure TacToolsTextFormattor.Update(Sender: TObject);
+begin
+  inherited;
+
+end;
+
+{ TacToolsRunScript }
+
+constructor TacToolsRunScript.Create(Owner: TComponent);
+begin
+  inherited;
+  Caption := 'Run Script';
+  ShortCut := Menus.ShortCut(VK_F9,[]);
+end;
+
+procedure TacToolsRunScript.Execute(Sender: TObject);
+begin
+  inherited;
+  ShowMessage(GI_ActiveEditor.GetFileName);
+  GI_EditorFactory.GetEditConf.Tools.RunTool ;
+end;
+
+procedure TacToolsRunScript.Update(Sender: TObject);
 begin
   inherited;
 

@@ -80,7 +80,8 @@ uses
   enEditor_TLB in 'enEditor_TLB.pas',
   uCoEditorIntf in 'uCoEditorIntf.pas' {CoEditor: CoClass},
   uSynWrapper in 'uSynWrapper.pas',
-  uConfig in 'uConfig.pas';
+  uConfig in 'uConfig.pas',
+  enEditorConf in 'enEditorConf.pas';
 
 {$R *.TLB}
 
