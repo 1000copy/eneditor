@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls,uEditorConf,StrUtils;
+  Dialogs, StdCtrls,StrUtils,uConfig;
 
 type
   TfmTools = class(TForm)
@@ -21,21 +21,23 @@ type
     procedure btnRunClick(Sender: TObject);
   private
     { Private declarations }
-    FEditorConf : IXMLEnEditorType ;
+    //FEditorConf : IXMLEnEditorType ;
+    FEditorConf : TenConfig;
     procedure Reload;
   public
     { Public declarations }
   end;
 
 
-procedure RunTools(AEditorConf : IXMLEnEditorType);
-
+//procedure RunTools(AEditorConf : IXMLEnEditorType);
+procedure RunTools(AEditorConf : Tenconfig);
 implementation
 
 {$R *.dfm}
 uses fuToolProp ,uEditAppIntfs;
 
-procedure RunTools(AEditorConf : IXMLEnEditorType);
+//procedure RunTools(AEditorConf : IXMLEnEditorType);
+procedure RunTools(AEditorConf : Tenconfig);
 var
   fm: TfmTools; i : Integer ;
 begin
@@ -78,7 +80,7 @@ var i : integer ;
 begin
   lst1.Clear ;
   for i := 0 to FEditorConf.Tools.Count -1 do
-   lst1.Items.Add(FEditorConf.Tools.Tool[i].Title );
+   lst1.Items.Add(FEditorConf.Tools.getbyindex(i).Title );
 end;
 procedure TfmTools.btnExitClick(Sender: TObject);
 begin
@@ -87,7 +89,7 @@ end;
 
 procedure TfmTools.btnRunClick(Sender: TObject);
 var
-  xmlTool : IXMLTooltype ;
+  xmlTool : TenTool ;
   argu ,a : String ;
   sl : TStringList ;
 
@@ -95,7 +97,7 @@ begin
   if self.lst1.ItemIndex > -1 then begin
     sl := TStringList.Create ;
     try
-      xmlTool := FEditorConf.Tools.Tool[self.lst1.ItemIndex] ;
+      xmlTool := FEditorConf.Tools.GetByIndex(self.lst1.ItemIndex) ;
       argu :=  StringReplace(xmlTool.Argument,'$FileName$',GI_ActiveEditor.GetFileName +' ',[rfReplaceAll, rfIgnoreCase]);
       a := xmlTool.Cmd + ' ' +argu ;
       sl.Add(a);

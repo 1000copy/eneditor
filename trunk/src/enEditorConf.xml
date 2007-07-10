@@ -5,5 +5,5 @@
 		<Size>11</Size>
 	</Font>
 	<Tools>
-		<Tool title="cmd" cmd="c:\windows\system32\cmd.exe" argument="/c dir c:\windows\system32" initdir=""/><Tool title="Ruby" cmd="&quot;E:\emuledown\InstantRails-1.7-win\InstantRails\ruby\bin\ruby.exe&quot;" argument="$Filename$" initdir=""/></Tools>
+		<Tool title="cmd" cmd="c:\windows\system32\cmd.exe" argument="/c dir c:\windows\system32" initdir="d"/><Tool title="Ruby" cmd="&quot;E:\emuledown\InstantRails-1.7-win\InstantRails\ruby\bin\ruby.exe&quot;" argument="$Filename$" initdir=""/></Tools>
 </enEditor>
