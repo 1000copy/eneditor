@@ -64,6 +64,7 @@ object fmTools: TfmTools
     Height = 25
     Caption = 'Run'
     TabOrder = 5
+    Visible = False
     OnClick = btnRunClick
   end
 end

@@ -18,6 +18,8 @@ type
     Label2: TLabel;
     btnOK: TButton;
     btnCancel: TButton;
+    Label3: TLabel;
+    edtExt: TEdit;
   private
     { Private declarations }
     FCreateNew : Boolean;
@@ -50,12 +52,14 @@ begin
          edtCmd.Text := Cmd ;
          edtParams.Text := Argument;
          edtInitDir.Text := InitDir;
+         edtExt.Text := Ext;
          //fm.FEditorConf.Tools.Add(xmlTool);
     end else  begin
          edtTitle.Text := '';
          edtCmd.Text := '' ;
          edtParams.Text := '';
          edtInitDir.Text := '';
+         edtExt.Text := '';
     end ;
     if MrOK = fm.ShowModal then begin
       if Index = -1 then begin
@@ -68,6 +72,7 @@ begin
          Cmd := edtCmd.Text ;
          Argument := edtParams.Text ;
          InitDir := edtInitDir.Text;
+         Ext := edtExt.Text ;
       end;
       AEditorConf.Save ;
     end;
