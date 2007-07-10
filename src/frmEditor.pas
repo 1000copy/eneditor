@@ -8,7 +8,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
   uEditAppIntfs, uAction,ActnList,
-  ComCtrls ,uMRU,uHLs,uEditorConf,
+  ComCtrls ,uMRU,uHLs,uConfig ,
   Dialogs,fuTools, uSynWrapper,XMLDoc,XMLIntf;
 
 type
@@ -137,7 +137,8 @@ type
   private
     fMRU : TadpMRU ;
     fMRUFolders : TadpMRU ;
-    FEditorConf : IXMLEnEditorType ;
+    //FEditorConf : IXMLEnEditorType ;
+    FEditorConf : TenConfig  ;
     FFont : TFont ;
     FPageControl : TPageControl ;
     FXMLDoc : TXMLDocument ;
@@ -165,7 +166,8 @@ type
     function GetFont:TFont;
     procedure DoOpenFile(AFileName: string);
     procedure AskEnable ;
-    function GetEditConf :IXMLEnEditorType;
+    //function GetEditConf :IXMLEnEditorType;
+    function GetEditConf :TenConfig;
     procedure RunToolsConf ;
   public
     constructor Create (APageControl:TPageControl);
@@ -600,14 +602,13 @@ begin
   fMRUFolders.OnClick := OnOpenMRUFolders ;
   fMRUFolders.RegistryPath:='\software\lcjun\enEditor\mruFolders';
   InitMenu ;
-  FXMLDoc := TXMLDocument.Create(nil);
-  FXMLDoc.Options := FXMLDoc.Options + [doAutoSave];
-  // Must be a absolute directory ,otherwise will report
-  // error when Shell click a text file !
-  FXMLDoc.FileName := ExtractFilePath(ParamStr(0))+ ConfFile;
-  FXMLDoc.Active := True ;
+  //FXMLDoc := TXMLDocument.Create(nil);
+  //FXMLDoc.Options := FXMLDoc.Options + [doAutoSave];
+  //FXMLDoc.FileName := ExtractFilePath(ParamStr(0))+ ConfFile;
+  //FXMLDoc.Active := True ;
   //FEditorConf := LoadenEditor(ConfFile);
-  FEditorConf := GetenEditor (FXMLDoc);
+  //FEditorConf := GetenEditor (FXMLDoc);
+  FEditorConf := TenConfigFactory.MakeInstance(ConfFile);
   FFont := TFont.Create ;
   FFont.Name := FEditorConf.Font.Name ;
   FFont.Size := FEditorConf.Font.Size ;
@@ -1145,7 +1146,8 @@ begin
   end;
   FEditorConf.Font.Name := Font.Name ;
   FEditorConf.Font.Size := Font.Size  ;
-  FEditorConf.OwnerDocument.SaveToFile (ConfFile);
+  //FEditorConf.OwnerDocument.SaveToFile (ConfFile);
+  FEditorConf.Save ;
 end;
 
 procedure TEditorFactory.AddMRU(Filename: String);
@@ -1229,7 +1231,8 @@ begin
   fMRUFolders.AskEnable ;
 end;
 
-function TEditorFactory.GetEditConf: IXMLEnEditorType;
+//function TEditorFactory.GetEditConf: IXMLEnEditorType;
+function TEditorFactory.GetEditConf: TenConfig;
 begin
   Result := Self.FEditorConf ;
 end;
