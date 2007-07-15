@@ -10,7 +10,7 @@ uses
   ActnList,
   // Highlighter Class
   SynEditHighlighter,
-  SynHighlighterSQL, SynHighlighterPas,SynHighlighterRuby,
+  SynHighlighterSQL, SynHighlighterPas,SynHighlighterRuby,SynHighlighterPython,
   SynHighlighterXML, SynHighlighterHtml,uMRU;
 
 type
@@ -20,6 +20,7 @@ type
     SynSQLSyn1: TSynSQLSyn;
     SynXMLSyn1: TSynXMLSyn;
     SynRB: TSynRubySyn;
+    SynPY: TSynPythonSyn;
     HL: TStringList;
     function GetHighlighterFromFileExt(AHighlighters: TStringList;
       Extension: string): TSynCustomHighlighter;
@@ -110,8 +111,9 @@ begin
   SynSQLSyn1:= TSynSQLSyn.Create(Self);
   SynXMLSyn1:= TSynXMLSyn.Create(Self);
   SynRB:=  TSynRubySyn.Create(Self);
+  SynPY:= TSynPythonSyn.Create(Self);;
   HL := TStringList.Create;
-  GetHL([SynPasSyn1,SynSQLSyn1,SynXMLSyn1,SynRB],FALSE);
+  GetHL([SynPasSyn1,SynSQLSyn1,SynXMLSyn1,SynRB,SynPY],FALSE);
 end;
 
 
@@ -132,6 +134,7 @@ begin
             'PAS|*.pas|'+
             'SQL|*.sql|'+
             'XML|*.xml|'+
+            'Python|*.py|'+
             'Ruby|*.rb|'
 end;
 
