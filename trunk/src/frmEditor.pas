@@ -36,6 +36,7 @@ type
     SynEditor : TenSynEdit ;
     fEditor : TEditorForm ;
     fSearchFromCaret: boolean;
+
     procedure GetCoord(const Line, Column: Integer; var APos: TPoint;
       var EditRect: TRect);
     function DoAskSaveChanges: boolean;
@@ -1273,6 +1274,7 @@ begin
   Self := Self ;
   Self.fUntitledNumber := -1 ;
 end;
+
 
 end.
 

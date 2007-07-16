@@ -89,6 +89,7 @@ uses
 var
   I : IcoEditor;
 begin
+
   if not IsRunning(Application.Handle) then begin
     Application.Initialize;
     Application.CreateForm(TMainForm, MainForm);
@@ -100,5 +101,11 @@ begin
       I.OpenEditor(ParamStr(1));
     CoUninitialize;
   end;
+  {
+  Application.Initialize;
+  Application.CreateForm(TMainForm, MainForm);
+  Application.Run;
+  }
+
 end.
 

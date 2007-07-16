@@ -2,7 +2,7 @@ unit uSynWrapper;
 
 interface
 uses
-  Forms,SynEdit,classes,SynEditSearch,SynEditRegexSearch,
+  Forms,SynEdit,classes,SynEditSearch,SynEditRegexSearch,Dialogs,
   Controls,uEditAppIntfs,ComCtrls,Types,SynEditHighlighter,SynEditTypes,dlgConfirmReplace;
 type
   TGetCoord = procedure (const Line, Column: Integer;var APos: TPoint;var EditRect: TRect) of object ;
@@ -16,6 +16,7 @@ type
     FOnCalcCoord: TGetCoord;
     FOnAssignInterfacePointer: TDoAssignInterfacePointer;
     FIsEmpty: Boolean;
+    procedure DoDropFiles(Sender: TObject; X, Y: integer; AFiles: TStrings);
     procedure SetUseRegexp(const Value: Boolean);
     function GetDefaultFilter: string;
     procedure SetOnCalcCoord(const Value: TGetCoord);
@@ -73,6 +74,9 @@ begin
   OnStatusChange := SynEditorStatusChange;
   OnEnter :=  SynEditorEnter ;
   OnExit :=  SynEditorExit ;
+  OnDropFiles := DoDropFiles ;
+  Options := Options +[eoTabIndent,eoDropFiles];
+  WantTabs := True;
 end;
 
 destructor TenSynEdit.Destroy;
@@ -203,6 +207,15 @@ begin
       Result := FALSE;
       break;
     end;
+end;
+
+procedure TenSynEdit.DoDropFiles(Sender: TObject; X, Y: integer;
+  AFiles: TStrings);
+var
+  i : Integer ;
+begin
+   for i := 0 to AFiles.Count -1 do
+    GI_EditorFactory.DoOpenFile(AFiles.Strings[I]);
 end;
 
 end.
