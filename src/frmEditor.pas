@@ -31,7 +31,6 @@ type
     procedure FormActivate(Sender: TObject);
     procedure FormDeactivate(Sender: TObject);
     procedure SynEditorChange(Sender: TObject);
-    procedure FormCreate(Sender: TObject);
   private
     SynEditor : TenSynEdit ;
     fEditor : TEditorForm ;
@@ -874,12 +873,12 @@ end;
 
 procedure TEditorForm.FormActivate(Sender: TObject);
 begin
-  DoAssignInterfacePointer(TRUE);
+//  DoAssignInterfacePointer(TRUE);
 end;
 
 procedure TEditorForm.FormDeactivate(Sender: TObject);
 begin
-  DoAssignInterfacePointer(FALSE);
+//  DoAssignInterfacePointer(FALSE);
 end;
 
 procedure TEditorForm.FormShow(Sender: TObject);
@@ -939,7 +938,8 @@ begin
   PCtrl := Sheet.PageControl;
   Assert(PCtrl <> nil );
   PCtrl.ActivePage := Sheet;
-  // 我认为这里不应该SetFocus  //SetFocus;
+  // 我认为这里不应该SetFocus  //
+  //Self.SynEditor.SetFocus;
 end;
 
 function TEditorForm.DoAskSaveChanges: boolean;
@@ -1247,8 +1247,9 @@ begin
   RunTools(Self.FEditorConf);
 end;
 
-procedure TEditorForm.FormCreate(Sender: TObject);
+constructor TEditorForm.Create(AOwner: TComponent);
 begin
+  inherited;
   SynEditor := TenSynEdit.Create(self);
   SynEditor.OnAssignInterface := DoAssignInterfacePointer ;
   SynEditor.OnChange :=  SynEditorChange ;
@@ -1261,11 +1262,7 @@ begin
   Self.lmiEditDelete.Action  := TacEditDelete.Create(Self);
   Self.lmiEditCopy.Action  := TacEditCopy.Create(Self);
   Self.lmiEditUndo.Action  := TacEditUndo.Create(Self);
-end;
 
-constructor TEditorForm.Create(AOwner: TComponent);
-begin
-  inherited;
   BorderStyle := bsNone;
   Parent := TEditorTabSheet(AOwner);
   Align := alClient;

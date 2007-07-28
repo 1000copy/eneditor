@@ -81,6 +81,9 @@ end;
 
 destructor TenSynEdit.Destroy;
 begin
+  // 解决：Alt+F4退出时会报AV错误。
+  FOnAssignInterfacePointer (False);
+  // end 解决
   FSearch.Free ;
   FRegExpSearch.Free ;
   inherited;
