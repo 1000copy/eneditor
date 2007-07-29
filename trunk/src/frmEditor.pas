@@ -9,7 +9,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
   uEditAppIntfs, uAction,ActnList,
   ComCtrls ,uMRU,uHLs,uConfig ,
-  Dialogs,fuTools, uSynWrapper,XMLDoc,XMLIntf;
+  Dialogs,fuTools, uSynWrapper,XMLDoc,XMLIntf, StdCtrls, ExtCtrls;
 
 type
 
@@ -24,6 +24,8 @@ type
     lmiEditUndo: TMenuItem;
     lmiEditRedo: TMenuItem;
     N2: TMenuItem;
+    pnl1: TPanel;
+    edt1: TEdit;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormDestroy(Sender: TObject);
@@ -31,8 +33,9 @@ type
     procedure FormActivate(Sender: TObject);
     procedure FormDeactivate(Sender: TObject);
     procedure SynEditorChange(Sender: TObject);
-  private
+  public
     SynEditor : TenSynEdit ;
+  private
     fEditor : TEditorForm ;
     fSearchFromCaret: boolean;
 
@@ -211,8 +214,9 @@ resourcestring
 
 procedure TEditorForm.Activate;
 begin
-  if Self <> nil then
-    Self.DoActivate;
+  if Self <> nil then begin
+    DoActivate;
+  end;
 end;
 
 function TEditorForm.AskSaveChanges: boolean;
@@ -555,7 +559,9 @@ end;
 
 procedure TEditorTabSheet.WMDeleteThis(var Msg: TMessage);
 begin
-  Free;
+  // Self.PageControl.OnChange(Self);
+  Self.FEditorForm.Free ;
+  Free;                           
 end;
 
 
@@ -889,7 +895,7 @@ end;
 procedure TEditorForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   SendMessage(Parent.Handle, WM_DELETETHIS, 0, 0);
-  Action := caNone;
+  //Action := caNone;
 end;
 
 procedure TEditorForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -938,8 +944,11 @@ begin
   PCtrl := Sheet.PageControl;
   Assert(PCtrl <> nil );
   PCtrl.ActivePage := Sheet;
+  // 不加这个if判断不行，报cannot focus 。。。，跟踪下去，发现是MainForm 还没有Visible
+  if MainForm.Visible and MainForm.Enabled then
+    SynEditor.SetFocus ;
   // 我认为这里不应该SetFocus  //
-  //Self.SynEditor.SetFocus;
+
 end;
 
 function TEditorForm.DoAskSaveChanges: boolean;
@@ -1124,7 +1133,9 @@ procedure TEditorFactory.CloseEditor ;
 var
   fUntitledNumber,i : Integer;
   FileName : String;
+  Old_ActiveEditor : IEditor ;
 begin
+  
   I := fEditors.IndexOf(GI_ActiveEditor);
   Assert(I > -1 );
   GI_ActiveEditor.CloseEditor;
@@ -1205,7 +1216,8 @@ begin
       Assert(ResultEditor <> nil );
       fEditors.Add(ResultEditor);
   end;
-  ResultEditor.Activate ;
+  if Assigned(ResultEditor) then 
+    ResultEditor.Activate ;
 end;
 
 function TEditorFactory.GetUntitledNumber: integer;
@@ -1250,11 +1262,12 @@ end;
 constructor TEditorForm.Create(AOwner: TComponent);
 begin
   inherited;
-  SynEditor := TenSynEdit.Create(self);
+  SynEditor := TenSynEdit.Create(nil);
   SynEditor.OnAssignInterface := DoAssignInterfacePointer ;
   SynEditor.OnChange :=  SynEditorChange ;
   SynEditor.OnCalcCoord := GetCoord;
   SynEditor.PopupMenu := Self.pmnuEditor ;
+  Self.InsertControl(SynEditor);
   Self.lmiEditCut.Action  := TacEditCut.Create(Self);
   Self.lmiEditSelectAll.Action  := TacEditSelectAll.Create(Self);
   Self.lmiEditRedo.Action  := TacEditRedo.Create(Self);
