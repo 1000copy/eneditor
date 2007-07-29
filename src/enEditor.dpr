@@ -64,7 +64,7 @@ uses
   ActiveX,
   frmMain in 'frmMain.pas' {MainForm},
   uEditAppIntfs in 'uEditAppIntfs.pas',
-  frmEditor in 'frmEditor.pas' {EditorForm},
+  frmEditor in 'frmEditor.pas' {Editor},
   uHLs in 'uHLs.pas' {CommandsDataModule: TDataModule},
   dlgConfirmReplace in 'dlgConfirmReplace.pas' {ConfirmReplaceDialog},
   dlgReplaceText in 'dlgReplaceText.pas',

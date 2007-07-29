@@ -12,7 +12,7 @@ unit enEditor_TLB;
 // ************************************************************************ //
 
 // PASTLWTR : 1.2
-// File generated on 2007-7-29 обнГ 01:21:28 from Type Library described below.
+// File generated on 2007-7-29 обнГ 04:51:29 from Type Library described below.
 
 // ************************************************************************  //
 // Type Lib: E:\codestock\eneditor\src\enEditor.tlb (1)

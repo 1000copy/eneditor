@@ -476,7 +476,7 @@ end;
 procedure TacFileSave.Execute(Sender: TObject);
 begin
   inherited;
-    GI_FileCmds.ExecSave;
+    GI_ActiveEditor.ExecSave;
 end;
 
 
@@ -484,7 +484,7 @@ end;
 procedure TacFileSave.Update(Sender: TObject);
 begin
   inherited;
-  Enabled := GI_FileCmds.CanSave;
+  Enabled := GI_ActiveEditor.CanSave;
 end;
 
 { TacFileCloseAll }
@@ -563,13 +563,13 @@ end;
 procedure TacFilePrint.Execute(Sender: TObject);
 begin
   inherited;
-  GI_FileCmds.ExecPrint;
+  GI_ActiveEditor.ExecPrint;
 end;
 
 procedure TacFilePrint.Update(Sender: TObject);
 begin
   inherited;
-  Enabled := GI_FileCmds.CanPrint ;
+  Enabled := GI_ActiveEditor.CanPrint ;
 end;
 
 { TacFileSaveAs }
@@ -583,13 +583,13 @@ end;
 procedure TacFileSaveAs.Execute(Sender: TObject);
 begin
   inherited;
-  GI_FileCmds.ExecSaveAs;
+  GI_ActiveEditor.ExecSaveAs;
 end;
 
 procedure TacFileSaveAs.Update(Sender: TObject);
 begin
   inherited;
-  Enabled := GI_FileCmds.CanSaveAS;
+  Enabled := GI_ActiveEditor.CanSaveAS;
 end;
 
 { TacEditUndo }
@@ -604,13 +604,13 @@ end;
 procedure TacEditUndo.Execute(Sender: TObject);
 begin
   inherited;
-  GI_EditCmds.ExecUndo;
+  GI_ActiveEditor.ExecUndo;
 end;
 
 procedure TacEditUndo.Update(Sender: TObject);
 begin
   inherited;
-  Enabled := GI_EditCmds.CanUndo ;
+  Enabled := GI_ActiveEditor.CanUndo ;
 end;
 
 { TacEditRedo }
@@ -624,13 +624,13 @@ end;
 procedure TacEditRedo.Execute(Sender: TObject);
 begin
   inherited;
-  GI_EditCmds.ExecRedo ;
+  GI_ActiveEditor.ExecRedo ;
 end;
 
 procedure TacEditRedo.Update(Sender: TObject);
 begin
   inherited;
-  Enabled := GI_EditCmds.CanRedo ;
+  Enabled := GI_ActiveEditor.CanRedo ;
 end;
 
 { TacEditFindPrevious }
@@ -645,13 +645,13 @@ end;
 procedure TacEditFindPrevious.Execute(Sender: TObject);
 begin
   inherited;
-  GI_SearchCmds.ExecFindPrev ;
+  GI_ActiveEditor.ExecFindPrev ;
 end;
 
 procedure TacEditFindPrevious.Update(Sender: TObject);
 begin
   inherited;
-  Enabled := GI_SearchCmds.CanFindPrev ;
+  Enabled := GI_ActiveEditor.CanFindPrev ;
 end;
 
 { TacEditCut }
@@ -666,13 +666,13 @@ end;
 procedure TacEditCut.Execute(Sender: TObject);
 begin
   inherited;
-  GI_EditCmds.ExecCut ;
+  GI_ActiveEditor.ExecCut ;
 end;
 
 procedure TacEditCut.Update(Sender: TObject);
 begin
   inherited;
-  Enabled := GI_EditCmds.CanCut ;
+  Enabled := GI_ActiveEditor.CanCut ;
 end;
 
 { TacEditCopy }
@@ -688,13 +688,13 @@ end;
 procedure TacEditCopy.Execute(Sender: TObject);
 begin
   inherited;
-  GI_EditCmds.ExecCopy ;
+  GI_ActiveEditor.ExecCopy ;
 end;
 
 procedure TacEditCopy.Update(Sender: TObject);
 begin
   inherited;
-  Enabled := GI_EditCmds.CanCopy ;
+  Enabled := GI_ActiveEditor.CanCopy ;
 end;
 
 { TacEditPaste }
@@ -710,13 +710,13 @@ end;
 procedure TacEditPaste.Execute(Sender: TObject);
 begin
   inherited;
-  GI_EditCmds.ExecPaste ;
+  GI_ActiveEditor.ExecPaste ;
 end;
 
 procedure TacEditPaste.Update(Sender: TObject);
 begin
   inherited;
-  Enabled := GI_EditCmds.CanPaste ;
+  Enabled := GI_ActiveEditor.CanPaste ;
 end;
 
 { TacEditDelete }
@@ -732,13 +732,13 @@ end;
 procedure TacEditDelete.Execute(Sender: TObject);
 begin
   inherited;
-  GI_EditCmds.ExecDelete ;
+  GI_ActiveEditor.ExecDelete ;
 end;
 
 procedure TacEditDelete.Update(Sender: TObject);
 begin
   inherited;
-  Enabled := GI_EditCmds.CanDelete;
+  Enabled := GI_ActiveEditor.CanDelete;
 end;
 
 { TacEditSelectAll }
@@ -753,13 +753,13 @@ end;
 procedure TacEditSelectAll.Execute(Sender: TObject);
 begin
   inherited;
-  GI_EditCmds.ExecSelectAll;
+  GI_ActiveEditor.ExecSelectAll;
 end;
 
 procedure TacEditSelectAll.Update(Sender: TObject);
 begin
   inherited;
-  Enabled := GI_EditCmds.CanSelectAll ;
+  Enabled := GI_ActiveEditor.CanSelectAll ;
 end;
 
 { TacEditFind }
@@ -775,13 +775,13 @@ end;
 procedure TacEditFind.Execute(Sender: TObject);
 begin
   inherited;
-  GI_SearchCmds.ExecFind ;
+  GI_ActiveEditor.ExecFind ;
 end;
 
 procedure TacEditFind.Update(Sender: TObject);
 begin
   inherited;
-  Enabled := GI_SearchCmds.CanFind ;
+  Enabled := GI_ActiveEditor.CanFind ;
 end;
 
 { TacEditReplace }
@@ -795,13 +795,13 @@ end;
 procedure TacEditReplace.Execute(Sender: TObject);
 begin
   inherited;
-   GI_SearchCmds.ExecReplace;
+   GI_ActiveEditor.ExecReplace;
 end;
 
 procedure TacEditReplace.Update(Sender: TObject);
 begin
   inherited;
-   Enabled := GI_SearchCmds.CanReplace ;
+   Enabled := GI_ActiveEditor.CanReplace ;
 end;
 
 { TacEditFindNext }
@@ -816,13 +816,13 @@ end;
 procedure TacEditFindNext.Execute(Sender: TObject);
 begin
   inherited;
-  GI_SearchCmds.ExecFindNext ;
+  GI_ActiveEditor.ExecFindNext ;
 end;
 
 procedure TacEditFindNext.Update(Sender: TObject);
 begin
   inherited;
-  Enabled := GI_SearchCmds.CanFindNext ;
+  Enabled := GI_ActiveEditor.CanFindNext ;
 end;
 
 { TacViewFont }
