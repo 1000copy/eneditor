@@ -27,6 +27,9 @@ type
     procedure SetHasSelection (B : Boolean );
     procedure SetIsReadOnly (B : Boolean );
     procedure SetModified (B : Boolean );
+    procedure SetBookmark(I : Integer  );
+    procedure GotoBookmark(I : Integer  );
+
   end;
 
   IEditorFactory = interface
@@ -42,6 +45,7 @@ type
     procedure SetFont(Font :TFont);overload ;
     procedure SetFont(FontName : String;FontSize :Integer);overload ;
     procedure DoOpenFile(AFileName: string);
+    function Init: boolean;
     function GetUntitledNumber: integer;
     procedure ReleaseUntitledNumber(ANumber: integer);
     procedure AskEnable ;
