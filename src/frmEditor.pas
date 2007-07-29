@@ -13,7 +13,7 @@ uses
 
 type
 
-  TEditorForm = class(TForm,IEditor, IEditCommands, IFileCommands,ISearchCommands)
+  TEditor = class(TForm,IEditor, IEditCommands, IFileCommands,ISearchCommands)
     pmnuEditor: TPopupMenu;
     lmiEditCut: TMenuItem;
     lmiEditCopy: TMenuItem;
@@ -32,7 +32,7 @@ type
   public
     SynEditor : TenSynEdit ;
   private
-    fEditor : TEditorForm ;
+    fEditor : TEditor ;
     fSearchFromCaret: boolean;
 
     procedure GetCoord(const Line, Column: Integer; var APos: TPoint;
@@ -113,13 +113,11 @@ type
 //    procedure DoActivate;
     constructor Create(AOwner :TComponent);override ;
   end;
-const
-  WM_DELETETHIS  =  WM_USER + 42;
 
 type
-  TEditorTabSheet = class(TTabSheet)
+  TEditorTab = class(TTabSheet)
   private
-    FEditorForm : TEditorForm;
+    FEditorForm : TEditor;
   public
     constructor Create (AOwner: TComponent);override;
   end;
@@ -203,7 +201,7 @@ resourcestring
 { TEditor }
 
 
-procedure TEditorForm.Activate;
+procedure TEditor.Activate;
 var
   Sheet: TTabSheet;
   PCtrl: TPageControl;
@@ -221,7 +219,7 @@ begin
   end;
 end;
 
-function TEditorForm.AskSaveChanges: boolean;
+function TEditor.AskSaveChanges: boolean;
 begin
   if Self <> nil then
     Result := Self.DoAskSaveChanges
@@ -229,12 +227,12 @@ begin
     Result := TRUE;
 end;
 
-function TEditorForm.CanClose: boolean;
+function TEditor.CanClose: boolean;
 begin
   Result := Self <> nil;
 end;
 
-procedure TEditorForm.CloseEditor;
+procedure TEditor.CloseEditor;
 var
   fUntitledNumber : Integer ;
   FileName :String;
@@ -251,7 +249,7 @@ begin
   Parent.Free ;
 end;
 
-procedure TEditorForm.DoSetFileName(AFileName: string);
+procedure TEditor.DoSetFileName(AFileName: string);
 begin
   if AFileName <> fFileName then begin
     fFileName := AFileName;
@@ -262,7 +260,7 @@ begin
   end;
 end;
 
-function TEditorForm.GetCaretPos: TPoint;
+function TEditor.GetCaretPos: TPoint;
 begin
   if Self <> nil then
     Result := TPoint(Self.SynEditor.CaretXY)
@@ -270,7 +268,7 @@ begin
     Result := Point(-1, -1);
 end;
 
-function TEditorForm.GetEditorState: string;
+function TEditor.GetEditorState: string;
 begin
   if Self <> nil then begin
     if Self.SynEditor.ReadOnly then
@@ -283,12 +281,12 @@ begin
     Result := '';
 end;
 
-function TEditorForm.GetFileName: string;
+function TEditor.GetFileName: string;
 begin
   Result := fFileName;
 end;
 
-function TEditorForm.GetFileTitle: string;
+function TEditor.GetFileTitle: string;
 begin
   if fFileName <> '' then
     Result := ExtractFileName(fFileName)
@@ -297,7 +295,7 @@ begin
   end;
 end;
 
-function TEditorForm.GetModified: boolean;
+function TEditor.GetModified: boolean;
 begin
   if Self <> nil then
     Result := Self.SynEditor.Modified
@@ -305,7 +303,7 @@ begin
     Result := FALSE;
 end;
 
-procedure TEditorForm.OpenFile(AFileName: string);
+procedure TEditor.OpenFile(AFileName: string);
 begin
   fFileName := AFileName;
   if Self <> nil then begin
@@ -322,73 +320,73 @@ end;
 
 // IEditCommands implementation
 
-function TEditorForm.CanCopy: boolean;
+function TEditor.CanCopy: boolean;
 begin
   Result := (Self <> nil) and fHasSelection;
 end;
 
-function TEditorForm.CanCut: boolean;
+function TEditor.CanCut: boolean;
 begin
   Result := (Self <> nil) and fHasSelection and not fIsReadOnly;
 end;
 
-function TEditorForm.CanPaste: boolean;
+function TEditor.CanPaste: boolean;
 begin
   Result := (Self <> nil) and Self.SynEditor.CanPaste;
 end;
 
-function TEditorForm.CanRedo: boolean;
+function TEditor.CanRedo: boolean;
 begin
   Result := (Self <> nil) and Self.SynEditor.CanRedo;
 end;
 
-function TEditorForm.CanSelectAll: boolean;
+function TEditor.CanSelectAll: boolean;
 begin
   Result := Self <> nil;
 end;
 
-function TEditorForm.CanUndo: boolean;
+function TEditor.CanUndo: boolean;
 begin
   Result := (Self <> nil) and Self.SynEditor.CanUndo;
 end;
 
-procedure TEditorForm.ExecCopy;
+procedure TEditor.ExecCopy;
 begin
   if Self <> nil then
     Self.SynEditor.CopyToClipboard;
 end;
 
-procedure TEditorForm.ExecCut;
+procedure TEditor.ExecCut;
 begin
   if Self <> nil then
     Self.SynEditor.CutToClipboard;
 end;
 
-procedure TEditorForm.ExecDelete;
+procedure TEditor.ExecDelete;
 begin
   if Self <> nil then
     Self.SynEditor.SelText := '';
 end;
 
-procedure TEditorForm.ExecPaste;
+procedure TEditor.ExecPaste;
 begin
   if Self <> nil then
     Self.SynEditor.PasteFromClipboard;
 end;
 
-procedure TEditorForm.ExecRedo;
+procedure TEditor.ExecRedo;
 begin
   if Self <> nil then
     Self.SynEditor.Redo;
 end;
 
-procedure TEditorForm.ExecSelectAll;
+procedure TEditor.ExecSelectAll;
 begin
   if Self <> nil then
     Self.SynEditor.SelectAll;
 end;
 
-procedure TEditorForm.ExecUndo;
+procedure TEditor.ExecUndo;
 begin
   if Self <> nil then
     Self.SynEditor.Undo;
@@ -396,28 +394,28 @@ end;
 
 // IFileCommands implementation
 
-function TEditorForm.CanPrint: boolean;
+function TEditor.CanPrint: boolean;
 begin
   Result := FALSE;
 end;
 
-function TEditorForm.CanSave: boolean;
+function TEditor.CanSave: boolean;
 begin
   Result := (Self <> nil) and (fModified or (fFileName = ''));
 end;
 
-function TEditorForm.CanSaveAs: boolean;
+function TEditor.CanSaveAs: boolean;
 begin
   Result := Self <> nil;
 end;
 
-procedure TEditorForm.ExecPrint;
+procedure TEditor.ExecPrint;
 begin
   if Self <> nil then
 // TODO
 end;
 
-procedure TEditorForm.ExecSave;
+procedure TEditor.ExecSave;
 begin
   if Self <> nil then begin
     if fFileName <> '' then
@@ -427,7 +425,7 @@ begin
   end;
 end;
 
-procedure TEditorForm.ExecSaveAs;
+procedure TEditor.ExecSaveAs;
 begin
   if Self <> nil then
     Self.DoSaveAs;
@@ -435,46 +433,46 @@ end;
 
 // ISearchCommands implementation
 
-function TEditorForm.CanFind: boolean;
+function TEditor.CanFind: boolean;
 begin
   Result := (Self <> nil) and not fIsEmpty;
 end;
 
-function TEditorForm.CanFindNext: boolean;
+function TEditor.CanFindNext: boolean;
 begin
   Result := (Self <> nil) and not fIsEmpty and (gsSearchText <> '');
 end;
 
-function TEditorForm.CanReplace: boolean;
+function TEditor.CanReplace: boolean;
 begin
   Result := (Self <> nil) and not fIsReadOnly and not fIsEmpty;
 end;
 
-procedure TEditorForm.ExecFind;
+procedure TEditor.ExecFind;
 begin
   if Self <> nil then
     Self.ShowSearchReplaceDialog(FALSE);
 end;
 
-procedure TEditorForm.ExecFindNext;
+procedure TEditor.ExecFindNext;
 begin
   if Self <> nil then
     Self.DoSearchReplaceText(FALSE, FALSE);
 end;
 
-procedure TEditorForm.ExecFindPrev;
+procedure TEditor.ExecFindPrev;
 begin
   if Self <> nil then
     Self.DoSearchReplaceText(FALSE, TRUE);
 end;
 
-procedure TEditorForm.ExecReplace;
+procedure TEditor.ExecReplace;
 begin
   if Self <> nil then
     Self.ShowSearchReplaceDialog(TRUE);
 end;
 
-procedure TEditorForm.SetFont(Font: TFont);
+procedure TEditor.SetFont(Font: TFont);
 begin
   SynEditor.Font.Assign(Font);
 end;
@@ -493,7 +491,7 @@ begin
   end;
 end;
 
-procedure TEditorForm.SetFont(FontName: String; FontSize: Integer);
+procedure TEditor.SetFont(FontName: String; FontSize: Integer);
 var
   Font : TFont ;
 begin
@@ -507,27 +505,27 @@ begin
   end;
 end;
 
-function TEditorForm.GetUntitledNumber: Integer;
+function TEditor.GetUntitledNumber: Integer;
 begin
   Result := Self.fUntitledNumber ;
 end;
 
-function TEditorForm.GetStrings: TStrings;
+function TEditor.GetStrings: TStrings;
 begin
   Result := Self.SynEditor.Lines ;
 end;
 
-procedure TEditorForm.SetHasSelection(B: Boolean);
+procedure TEditor.SetHasSelection(B: Boolean);
 begin
   fHasSelection := B ;
 end;
 
-procedure TEditorForm.SetIsReadOnly(B: Boolean);
+procedure TEditor.SetIsReadOnly(B: Boolean);
 begin
   fIsReadOnly := B ;
 end;
 
-procedure TEditorForm.SetModified(B: Boolean);
+procedure TEditor.SetModified(B: Boolean);
 begin
   fModified := B ;
 end;
@@ -535,11 +533,11 @@ end;
 { TEditorTabSheet }
 
 
-constructor TEditorTabSheet.Create(AOwner: TComponent);
+constructor TEditorTab.Create(AOwner: TComponent);
 begin
   inherited;
   PageControl := TPageControl(AOwner);
-  FEditorForm := TEditorForm.Create(Self);
+  FEditorForm := TEditor.Create(Self);
   PageControl.ActivePage := Self;
   GI_ActiveEditor := FEditorForm ;
 end;
@@ -642,10 +640,10 @@ var
   acFile ,ac: TAction ;
   MainMenu : TMainMenu ;
 begin 
-  acFile := TacFile.Create(MainForm) ;
   MainMenu := TMainMenu.Create(MainForm) ;
   mFile := TMenuItem.Create(MainMenu) ;
   // File Menu
+  acFile := TacFile.Create(MainForm) ;
   mFile.Action := acFile ;
   MainMenu.Items.add(mFile);
   // New
@@ -932,14 +930,14 @@ end;
 
 
 
-procedure TEditorForm.FormShow(Sender: TObject);
+procedure TEditor.FormShow(Sender: TObject);
 begin
   DoUpdateCaption;
 end;
 
 
 
-procedure TEditorForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+procedure TEditor.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   // need to prevent this from happening more than once (e.g. with MDI childs)
   if not (csDestroying in ComponentState) then
@@ -947,7 +945,7 @@ begin
 end;
 
 
-procedure TEditorForm.SynEditorChange(Sender: TObject);
+procedure TEditor.SynEditorChange(Sender: TObject);
 var
   Empty: boolean;
   i: integer;
@@ -959,7 +957,7 @@ end;
 
 
 
-procedure TEditorForm.GetCoord(const Line, Column: Integer;var APos: TPoint;var EditRect: TRect);
+procedure TEditor.GetCoord(const Line, Column: Integer;var APos: TPoint;var EditRect: TRect);
 begin
   APos := SynEditor.GetScreenPos(Column, Line);
   EditRect := ClientRect;
@@ -968,7 +966,7 @@ begin
 end;
 
 
-function TEditorForm.DoAskSaveChanges: boolean;
+function TEditor.DoAskSaveChanges: boolean;
 const
   MBType = MB_YESNOCANCEL or MB_ICONQUESTION;
 var
@@ -990,7 +988,7 @@ begin
     Result := TRUE;
 end;
 
-procedure TEditorForm.DoAssignInterfacePointer(AActive: boolean);
+procedure TEditor.DoAssignInterfacePointer(AActive: boolean);
 begin
   if AActive then begin
     GI_ActiveEditor := fEditor;
@@ -1009,7 +1007,7 @@ begin
   end;
 end;
 
-function TEditorForm.DoSave: boolean;
+function TEditor.DoSave: boolean;
 begin
   Assert(fEditor <> nil);
   if fEditor.fFileName <> '' then
@@ -1018,7 +1016,7 @@ begin
     Result := DoSaveAs;
 end;
 
-function TEditorForm.DoSaveFile: boolean;
+function TEditor.DoSaveFile: boolean;
 begin
   Assert(fEditor <> nil);
   try
@@ -1032,7 +1030,7 @@ begin
   end;
 end;
 
-function TEditorForm.DoSaveAs: boolean;
+function TEditor.DoSaveAs: boolean;
 var
   NewName: string;
 begin
@@ -1048,7 +1046,7 @@ begin
     Result := FALSE;
 end;
 
-procedure TEditorForm.DoSearchReplaceText(AReplace: boolean;
+procedure TEditor.DoSearchReplaceText(AReplace: boolean;
   ABackwards: boolean);
 begin
   if  0 = SynEditor.DoSearchReplace (
@@ -1072,7 +1070,7 @@ begin
     ConfirmReplaceDialog.Free;
 end;
 
-procedure TEditorForm.DoUpdateCaption;
+procedure TEditor.DoUpdateCaption;
 begin
    Assert(fEditor <> nil);
    if fEditor.GetModified then
@@ -1081,7 +1079,7 @@ begin
      (Parent as TTabSheet).Caption := fEditor.GetFileTitle;
 end;
 
-procedure TEditorForm.DoUpdateHighlighter;
+procedure TEditor.DoUpdateHighlighter;
 begin
   Assert(fEditor <> nil);
   if fEditor.fFileName <> '' then begin
@@ -1091,7 +1089,7 @@ begin
     SynEditor.Highlighter := nil;
 end;
 
-procedure TEditorForm.ShowSearchReplaceDialog(AReplace: boolean);
+procedure TEditor.ShowSearchReplaceDialog(AReplace: boolean);
 var
   dlg: TTextSearchDialog;
 begin
@@ -1209,7 +1207,7 @@ procedure TEditorFactory.DoOpenFile(AFileName: string);
 var
   i : integer ;
   Editor,ResultEditor : IEditor ;
-  Sheet: TEditorTabSheet;
+  Sheet: TEditorTab;
 begin
   Assert(GI_EditorFactory <> nil);
   AFileName := ExpandFileName(AFileName);
@@ -1225,7 +1223,7 @@ begin
     end;
   end;
   if not Assigned(ResultEditor) then begin
-      Sheet := TEditorTabSheet.Create(FPageControl);
+      Sheet := TEditorTab.Create(FPageControl);
       ResultEditor := GI_ActiveEditor;
       ResultEditor.SetFont(FEditorConf.Font.Name,FEditorConf.Font.Size);
       ResultEditor.OpenFile(AFileName);
@@ -1274,7 +1272,7 @@ begin
   RunTools(Self.FEditorConf);
 end;
 
-constructor TEditorForm.Create(AOwner: TComponent);
+constructor TEditor.Create(AOwner: TComponent);
 begin
   inherited;
   SynEditor := TenSynEdit.Create(nil);
@@ -1291,7 +1289,7 @@ begin
   Self.lmiEditCopy.Action  := TacEditCopy.Create(Self);
   Self.lmiEditUndo.Action  := TacEditUndo.Create(Self);
 
-  Parent := TEditorTabSheet(Owner);
+  Parent := TEditorTab(Owner);
   BorderStyle := bsNone;  
   Align := alClient;
   Visible := TRUE;
@@ -1302,12 +1300,12 @@ end;
 
 
 
-procedure TEditorForm.GotoBookmark(I: Integer);
+procedure TEditor.GotoBookmark(I: Integer);
 begin
   self.SynEditor.GotoBookMark(I);
 end;
 
-procedure TEditorForm.SetBookmark(I: Integer);
+procedure TEditor.SetBookmark(I: Integer);
 begin
   self.SynEditor.SetBookMark(I,SynEditor.CaretX,SynEditor.CaretY);
 end;
