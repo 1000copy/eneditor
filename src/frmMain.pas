@@ -80,7 +80,11 @@ end;
 
 procedure TMainForm.pctrlMainChange(Sender: TObject);
 begin
-  GI_ActiveEditor := TEditorTabSheet(pctrlMain.ActivePage).EditIntf ;
+  //TEditorTabSheet(pctrlMain.ActivePage).SetFocus;
+  //GI_ActiveEditor := TEditorTabSheet(pctrlMain.ActivePage).EditIntf ;
+  //TEditorTabSheet(pctrlMain.ActivePage).LForm.SynEditor.SynEditorEnter(Self);
+  //GI_ActiveEditor.Activate ;
+
 end;
 
 

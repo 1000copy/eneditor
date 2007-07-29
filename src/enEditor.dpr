@@ -92,6 +92,7 @@ begin
 
   if not IsRunning(Application.Handle) then begin
     Application.Initialize;
+    Application.ShowMainForm := true ;
     Application.CreateForm(TMainForm, MainForm);
   Application.Run;
   end else begin
