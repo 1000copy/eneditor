@@ -766,6 +766,14 @@ begin
   mi := TMenuItem.Create(MainMenu) ;
   mView.add(mi);
   mi.Action := TacViewFont.Create(MainForm) ;
+  // StatusBar
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewStatusBar.Create(MainForm) ;
+  // -
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Caption := '-';
   // SetBookmark
   mi := TMenuItem.Create(MainMenu) ;
   mView.add(mi);
@@ -797,7 +805,11 @@ begin
   mi := TMenuItem.Create(MainMenu) ;
   mView.add(mi);
   mi.Action := TacViewSetBookMark0.Create(MainForm) ;
-  // GotoBookmark
+   // -
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Caption := '-';
+ // GotoBookmark
   mi := TMenuItem.Create(MainMenu) ;
   mView.add(mi);
   mi.Action := TacViewGotoBookmark1.Create(MainForm) ;
@@ -828,13 +840,6 @@ begin
   mi := TMenuItem.Create(MainMenu) ;
   mView.add(mi);
   mi.Action := TacViewGotoBookmark0.Create(MainForm) ;
-  mi := TMenuItem.Create(MainMenu) ;
-  mView.add(mi);
-  mi.Action := TacViewGotoBookmark1.Create(MainForm) ;
-  // StatusBar
-  mi := TMenuItem.Create(MainMenu) ;
-  mView.add(mi);
-  mi.Action := TacViewStatusBar.Create(MainForm) ;
   // Associate MainMenu
   // Tools
   mTools := TMenuItem.Create(MainMenu) ;
