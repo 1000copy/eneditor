@@ -13,7 +13,7 @@ uses
 
 type
 
-  TEditor = class(TForm,IEditor, IEditCommands, IFileCommands,ISearchCommands)
+  TEditor = class(TForm,IEditor)
     pmnuEditor: TPopupMenu;
     lmiEditCut: TMenuItem;
     lmiEditCopy: TMenuItem;
@@ -26,7 +26,6 @@ type
     N2: TMenuItem;
     pnl1: TPanel;
     edt1: TEdit;
-    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormShow(Sender: TObject);
     procedure SynEditorChange(Sender: TObject);
   public
@@ -67,7 +66,7 @@ type
     // IEditCommands implementation
     function CanCopy: boolean;
     function CanCut: boolean;
-    function IEditCommands.CanDelete = CanCut;
+    function CanDelete: boolean;
     function CanPaste: boolean;
     function CanRedo: boolean;
     function CanSelectAll: boolean;
@@ -81,17 +80,18 @@ type
     procedure ExecUndo;
     // IFileCommands implementation
     function CanClose: boolean;
+    function FileCanClose: boolean;
     function CanPrint: boolean;
     function CanSave: boolean;
     function CanSaveAs: boolean;
-    procedure IFileCommands.ExecClose = Close;
+    procedure ExecClose ;
     procedure ExecPrint;
     procedure ExecSave;
     procedure ExecSaveAs;
     // ISearchCommands implementation
     function CanFind: boolean;
     function CanFindNext: boolean;
-    function ISearchCommands.CanFindPrev = CanFindNext;
+    function CanFindPrev :Boolean;
     function CanReplace: boolean;
     procedure ExecFind;
     procedure ExecFindNext;
@@ -237,16 +237,18 @@ var
   fUntitledNumber : Integer ;
   FileName :String;
 begin
-  FileName := GetFileName ;
-  if (FileName <> '') then
-      GI_EditorFactory.AddMRU(FileName)
-  else begin
-    fUntitledNumber := GetUntitledNumber ;
-    if fUntitledNumber <> -1 then
-      GI_EditorFactory.ReleaseUntitledNumber(fUntitledNumber);
+  if AskSaveChanges then begin
+    FileName := GetFileName ;
+    if (FileName <> '') then
+        GI_EditorFactory.AddMRU(FileName)
+    else begin
+      fUntitledNumber := GetUntitledNumber ;
+      if fUntitledNumber <> -1 then
+        GI_EditorFactory.ReleaseUntitledNumber(fUntitledNumber);
+    end;
+    // 由 tabsheet 来释放EditorForm
+    Parent.Free ;
   end;
-  // 由 tabsheet 来释放EditorForm
-  Parent.Free ;
 end;
 
 procedure TEditor.DoSetFileName(AFileName: string);
@@ -937,21 +939,12 @@ end;
 
 
 
-procedure TEditor.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-begin
-  // need to prevent this from happening more than once (e.g. with MDI childs)
-  if not (csDestroying in ComponentState) then
-    CanClose := DoAskSaveChanges;
-end;
-
-
 procedure TEditor.SynEditorChange(Sender: TObject);
 var
   Empty: boolean;
   i: integer;
 begin
   Assert(fEditor <> nil);
-  //fEditor.IsEmpty := SynEditor.IsEmpty ;
   DoUpdateCaption ;
 end;
 
@@ -992,18 +985,9 @@ procedure TEditor.DoAssignInterfacePointer(AActive: boolean);
 begin
   if AActive then begin
     GI_ActiveEditor := fEditor;
-    GI_EditCmds := fEditor;
-    GI_FileCmds := fEditor;
-    GI_SearchCmds := fEditor;
   end else begin
     if GI_ActiveEditor = IEditor(fEditor) then
       GI_ActiveEditor := nil;
-    if GI_EditCmds = IEditCommands(fEditor) then
-      GI_EditCmds := nil;
-    if GI_FileCmds = IFileCommands(fEditor) then
-      GI_FileCmds := nil;
-    if GI_SearchCmds = ISearchCommands(fEditor) then
-      GI_SearchCmds := nil;
   end;
 end;
 
@@ -1308,6 +1292,26 @@ end;
 procedure TEditor.SetBookmark(I: Integer);
 begin
   self.SynEditor.SetBookMark(I,SynEditor.CaretX,SynEditor.CaretY);
+end;
+
+function TEditor.CanFindPrev: Boolean;
+begin
+  Result := CanFindNext ;
+end;
+
+procedure TEditor.ExecClose;
+begin
+  Close ;
+end;
+
+function TEditor.CanDelete: boolean;
+begin
+  Result := Cancut ;
+end;
+
+function TEditor.FileCanClose: boolean;
+begin
+  Result := CanClose ;
 end;
 
 end.
