@@ -26,12 +26,8 @@ type
     N2: TMenuItem;
     pnl1: TPanel;
     edt1: TEdit;
-    procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-    procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure FormActivate(Sender: TObject);
-    procedure FormDeactivate(Sender: TObject);
     procedure SynEditorChange(Sender: TObject);
   public
     SynEditor : TenSynEdit ;
@@ -111,8 +107,10 @@ type
     procedure SetIsReadOnly (B : Boolean );
     procedure SetModified (B : Boolean );
     //property EditorIntf: IEditor ;
+    procedure SetBookmark(I : Integer  );
+    procedure GotoBookmark(I : Integer  );
   public
-    procedure DoActivate;
+//    procedure DoActivate;
     constructor Create(AOwner :TComponent);override ;
   end;
 const
@@ -122,16 +120,8 @@ type
   TEditorTabSheet = class(TTabSheet)
   private
     FEditorForm : TEditorForm;
-    procedure WMDeleteThis(var Msg: TMessage);
-      message WM_DELETETHIS;
-    function GetEditIntf: IEditor;
   public
     constructor Create (AOwner: TComponent);override;
-    property LForm : TEditorForm read FEditorForm ;
-    property EditIntf : IEditor  read GetEditIntf ;
-    procedure SetFont(FontName:string;FontSize : Integer );
-    procedure OpenFile(AFilename:String);
-
   end;
 { TEditorFactory }
 
@@ -172,6 +162,7 @@ type
     //function GetEditConf :IXMLEnEditorType;
     function GetEditConf :TenConfig;
     procedure RunToolsConf ;
+    function Init: boolean;
   public
     constructor Create (APageControl:TPageControl);
     destructor Destroy; override;
@@ -213,9 +204,20 @@ resourcestring
 
 
 procedure TEditorForm.Activate;
+var
+  Sheet: TTabSheet;
+  PCtrl: TPageControl;
 begin
   if Self <> nil then begin
-    DoActivate;
+    //DoActivate;
+    Sheet := TTabSheet(Parent);
+    PCtrl := Sheet.PageControl;
+    Assert(PCtrl <> nil );
+    PCtrl.ActivePage := Sheet;
+    // 不加这个if判断不行，报cannot focus 。。。，跟踪下去，发现是MainForm 还没有Visible
+    if MainForm.Visible and MainForm.Enabled then
+      SynEditor.SetFocus ;
+    // 我认为这里不应该SetFocus  //
   end;
 end;
 
@@ -245,7 +247,8 @@ begin
     if fUntitledNumber <> -1 then
       GI_EditorFactory.ReleaseUntitledNumber(fUntitledNumber);
   end;
-  Close;
+  // 由 tabsheet 来释放EditorForm
+  Parent.Free ;
 end;
 
 procedure TEditorForm.DoSetFileName(AFileName: string);
@@ -304,7 +307,6 @@ end;
 
 procedure TEditorForm.OpenFile(AFileName: string);
 begin
-
   fFileName := AFileName;
   if Self <> nil then begin
     if (AFileName <> '') and FileExists(AFileName) then
@@ -539,31 +541,8 @@ begin
   PageControl := TPageControl(AOwner);
   FEditorForm := TEditorForm.Create(Self);
   PageControl.ActivePage := Self;
-  GI_ActiveEditor := EditIntf ;
+  GI_ActiveEditor := FEditorForm ;
 end;
-
-function TEditorTabSheet.GetEditIntf: IEditor;
-begin
-  Result := LForm ;
-end;
-
-procedure TEditorTabSheet.OpenFile(AFilename: String);
-begin
-  EditIntf.OpenFile(AFileName);
-end;
-
-procedure TEditorTabSheet.SetFont(FontName: string; FontSize: Integer);
-begin
-  EditIntf.SetFont(FontName,FontSize);
-end;
-
-procedure TEditorTabSheet.WMDeleteThis(var Msg: TMessage);
-begin
-  // Self.PageControl.OnChange(Self);
-  Self.FEditorForm.Free ;
-  Free;                           
-end;
-
 
 const
   ConfFile = 'enEditorConf.xml';
@@ -602,28 +581,32 @@ begin
 //  fMRU.ParentMenuItem := mRecentFiles ;
   fMRu.OnClick := OnOpenMRUFile ;
   fMRU.RegistryPath:='\software\lcjun\enEditor\mru';
-
   fMRUFolders := TadpMRU.Create(nil) ;
 //  fMRUFolders.ParentMenuItem := mRecentFolders ;
   fMRUFolders.OnClick := OnOpenMRUFolders ;
   fMRUFolders.RegistryPath:='\software\lcjun\enEditor\mruFolders';
   InitMenu ;
-  //FXMLDoc := TXMLDocument.Create(nil);
-  //FXMLDoc.Options := FXMLDoc.Options + [doAutoSave];
-  //FXMLDoc.FileName := ExtractFilePath(ParamStr(0))+ ConfFile;
-  //FXMLDoc.Active := True ;
-  //FEditorConf := LoadenEditor(ConfFile);
-  //FEditorConf := GetenEditor (FXMLDoc);
   FEditorConf := TenConfigFactory.MakeInstance(ConfFile);
   FFont := TFont.Create ;
   FFont.Name := FEditorConf.Font.Name ;
   FFont.Size := FEditorConf.Font.Size ;
-  //FEditorConf.Tools.Tool[0].Title
-  HLs := THLs.Create;
-
+  HLs := THLs.Create;  
 end;
-//function TEditorFactory.GetSaveFileName(var ANewName: string;
-//  AHighlighter: TSynCustomHighlighter): boolean;
+function TEditorFactory.Init: boolean;
+var
+  i, Cnt: integer;
+begin
+  Cnt := ParamCount;
+  if Cnt > 0 then begin
+    for i := 1 to Cnt do
+      DoOpenFile(ParamStr(i));
+    Result := TRUE;
+  end else
+    Result := FALSE;
+  if FPageControl.ActivePage = nil then
+   DoOpenFile('');
+end;
+
 function TEditorFactory.GetSaveFileName(var ANewName: string;DefaultFilters :String): boolean;
 var
    dlgFileSave :TSaveDialog ;
@@ -783,6 +766,71 @@ begin
   mi := TMenuItem.Create(MainMenu) ;
   mView.add(mi);
   mi.Action := TacViewFont.Create(MainForm) ;
+  // SetBookmark
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewSetBookMark1.Create(MainForm) ;
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewSetBookMark2.Create(MainForm) ;
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewSetBookMark3.Create(MainForm) ;
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewSetBookMark4.Create(MainForm) ;
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewSetBookMark5.Create(MainForm) ;
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewSetBookMark6.Create(MainForm) ;
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewSetBookMark7.Create(MainForm) ;
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewSetBookMark8.Create(MainForm) ;
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewSetBookMark9.Create(MainForm) ;
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewSetBookMark0.Create(MainForm) ;
+  // GotoBookmark
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewGotoBookmark1.Create(MainForm) ;
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewGotoBookmark2.Create(MainForm) ;
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewGotoBookmark3.Create(MainForm) ;
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewGotoBookmark4.Create(MainForm) ;
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewGotoBookmark5.Create(MainForm) ;
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewGotoBookmark6.Create(MainForm) ;
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewGotoBookmark7.Create(MainForm) ;
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewGotoBookmark8.Create(MainForm) ;
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewGotoBookmark9.Create(MainForm) ;
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewGotoBookmark0.Create(MainForm) ;
+  mi := TMenuItem.Create(MainMenu) ;
+  mView.add(mi);
+  mi.Action := TacViewGotoBookmark1.Create(MainForm) ;
   // StatusBar
   mi := TMenuItem.Create(MainMenu) ;
   mView.add(mi);
@@ -877,26 +925,14 @@ end;
 
 { TEditorForm }
 
-procedure TEditorForm.FormActivate(Sender: TObject);
-begin
-//  DoAssignInterfacePointer(TRUE);
-end;
 
-procedure TEditorForm.FormDeactivate(Sender: TObject);
-begin
-//  DoAssignInterfacePointer(FALSE);
-end;
 
 procedure TEditorForm.FormShow(Sender: TObject);
 begin
   DoUpdateCaption;
 end;
 
-procedure TEditorForm.FormClose(Sender: TObject; var Action: TCloseAction);
-begin
-  SendMessage(Parent.Handle, WM_DELETETHIS, 0, 0);
-  //Action := caNone;
-end;
+
 
 procedure TEditorForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
@@ -905,15 +941,6 @@ begin
     CanClose := DoAskSaveChanges;
 end;
 
-procedure TEditorForm.FormDestroy(Sender: TObject);
-var
-  LEditor: IEditor;
-begin
-  LEditor := fEditor ;
-  Assert(fEditor <> nil);
-  Assert(GI_EditorFactory <> nil);
-  GI_EditorFactory.RemoveEditor(LEditor);
-end;
 
 procedure TEditorForm.SynEditorChange(Sender: TObject);
 var
@@ -935,21 +962,6 @@ begin
   EditRect.BottomRight := ClientToScreen(EditRect.BottomRight);
 end;
 
-procedure TEditorForm.DoActivate;
-var
-  Sheet: TTabSheet;
-  PCtrl: TPageControl;
-begin
-  Sheet := TTabSheet(Parent);
-  PCtrl := Sheet.PageControl;
-  Assert(PCtrl <> nil );
-  PCtrl.ActivePage := Sheet;
-  // 不加这个if判断不行，报cannot focus 。。。，跟踪下去，发现是MainForm 还没有Visible
-  if MainForm.Visible and MainForm.Enabled then
-    SynEditor.SetFocus ;
-  // 我认为这里不应该SetFocus  //
-
-end;
 
 function TEditorForm.DoAskSaveChanges: boolean;
 const
@@ -959,7 +971,7 @@ var
 begin
   // this is necessary to prevent second confirmation when closing MDI childs
   if SynEditor.Modified then begin
-    DoActivate;
+    //DoActivate;
     MessageBeep(MB_ICONQUESTION);
     Assert(fEditor <> nil);
     s := Format(SAskSaveChanges, [ExtractFileName(fEditor.GetFileTitle)]);
@@ -1133,11 +1145,10 @@ procedure TEditorFactory.CloseEditor ;
 var
   fUntitledNumber,i : Integer;
   FileName : String;
-  Old_ActiveEditor : IEditor ;
 begin
-  
   I := fEditors.IndexOf(GI_ActiveEditor);
   Assert(I > -1 );
+  RemoveEditor(GI_ActiveEditor);
   GI_ActiveEditor.CloseEditor;
   if I > 0 then
     GI_ActiveEditor := GetEditor(I -1 )
@@ -1210,14 +1221,13 @@ begin
   end;
   if not Assigned(ResultEditor) then begin
       Sheet := TEditorTabSheet.Create(FPageControl);
-      ResultEditor := Sheet.EditIntf ;
-      Sheet.SetFont(FEditorConf.Font.Name,FEditorConf.Font.Size);
-      Sheet.OpenFile(AFileName);
+      ResultEditor := GI_ActiveEditor;
+      ResultEditor.SetFont(FEditorConf.Font.Name,FEditorConf.Font.Size);
+      ResultEditor.OpenFile(AFileName);
       Assert(ResultEditor <> nil );
       fEditors.Add(ResultEditor);
   end;
-  if Assigned(ResultEditor) then 
-    ResultEditor.Activate ;
+  ResultEditor.Activate ;
 end;
 
 function TEditorFactory.GetUntitledNumber: integer;
@@ -1248,7 +1258,7 @@ begin
   fMRUFolders.AskEnable ;
 end;
 
-//function TEditorFactory.GetEditConf: IXMLEnEditorType;
+ 
 function TEditorFactory.GetEditConf: TenConfig;
 begin
   Result := Self.FEditorConf ;
@@ -1276,8 +1286,8 @@ begin
   Self.lmiEditCopy.Action  := TacEditCopy.Create(Self);
   Self.lmiEditUndo.Action  := TacEditUndo.Create(Self);
 
-  BorderStyle := bsNone;
-  Parent := TEditorTabSheet(AOwner);
+  Parent := TEditorTabSheet(Owner);
+  BorderStyle := bsNone;  
   Align := alClient;
   Visible := TRUE;
   fEditor := Self ;
@@ -1285,6 +1295,17 @@ begin
   Self.fUntitledNumber := -1 ;
 end;
 
+
+
+procedure TEditorForm.GotoBookmark(I: Integer);
+begin
+  self.SynEditor.GotoBookMark(I);
+end;
+
+procedure TEditorForm.SetBookmark(I: Integer);
+begin
+  self.SynEditor.SetBookMark(I,SynEditor.CaretX,SynEditor.CaretY);
+end;
 
 end.
 

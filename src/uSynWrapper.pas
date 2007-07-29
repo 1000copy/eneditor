@@ -75,7 +75,7 @@ begin
   OnEnter :=  SynEditorEnter ;
   OnExit :=  SynEditorExit ;
   OnDropFiles := DoDropFiles ;
-  Options := Options +[eoTabIndent,eoDropFiles];
+  Options := Options +[eoTabIndent,eoDropFiles,eoAltSetsColumnMode];
   WantTabs := True;
 end;
 

@@ -194,6 +194,109 @@ type
   public
     constructor Create(Owner : TComponent);override;
   end;
+  TacViewSetBookmark =class(TacBase)
+  protected
+    FBookmarkIndex : Integer;
+    procedure Execute(Sender: TObject);override ;
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+  TacViewGotoBookmark =class(TacBase)
+  protected
+    FBookmarkIndex : Integer;
+    procedure Execute(Sender: TObject);override ;
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+  TacViewSetBookmark1 =class(TacViewSetBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+  TacViewGotoBookmark1 =class(TacViewGotoBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+
+  TacViewSetBookmark2 =class(TacViewSetBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+  TacViewGotoBookmark2 =class(TacViewGotoBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+
+  TacViewSetBookmark3 =class(TacViewSetBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+  TacViewGotoBookmark3 =class(TacViewGotoBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+
+  TacViewSetBookmark4 =class(TacViewSetBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+  TacViewGotoBookmark4 =class(TacViewGotoBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+
+  TacViewSetBookmark5 =class(TacViewSetBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+  TacViewGotoBookmark5 =class(TacViewGotoBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+
+  TacViewSetBookmark6 =class(TacViewSetBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+  TacViewGotoBookmark6 =class(TacViewGotoBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+
+  TacViewSetBookmark7 =class(TacViewSetBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+  TacViewGotoBookmark7 =class(TacViewGotoBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+
+  TacViewSetBookmark8 =class(TacViewSetBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+  TacViewGotoBookmark8 =class(TacViewGotoBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+
+  TacViewSetBookmark9 =class(TacViewSetBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+  TacViewGotoBookmark9 =class(TacViewGotoBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+
+  TacViewSetBookmark0 =class(TacViewSetBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
+  TacViewGotoBookmark0 =class(TacViewGotoBookmark)
+  public
+    constructor Create(Owner : TComponent);override;
+  end;
   TacOnlyUpdate =class(TacBase)
   private
     fm : TfmAbout ;
@@ -879,6 +982,209 @@ procedure TacToolsRunScript.Update(Sender: TObject);
 begin
   inherited;
 
+end;
+
+{ TacViewGotoBookmark }
+
+constructor TacViewGotoBookmark.Create(Owner: TComponent);
+begin
+  inherited;
+  Caption := Format('GotoBookmark(%d)',[FBookmarkIndex]);
+  //ShortCut := Menus.ShortCut(VK_F3,[]);
+end;
+
+procedure TacViewGotoBookmark.Execute(Sender: TObject);
+begin
+  inherited;
+  GI_ActiveEditor.GotoBookmark(FBookmarkIndex);
+end;
+
+
+{ TacViewSetBookmark }
+
+constructor TacViewSetBookmark.Create(Owner: TComponent);
+begin
+  inherited;
+  Caption := Format('SetBookmark(%d)',[FBookmarkIndex]);
+end;
+
+procedure TacViewSetBookmark.Execute(Sender: TObject);
+begin
+  inherited;
+  GI_ActiveEditor.SetBookmark(FBookmarkIndex);
+end;
+
+
+{ TacViewGotoBookmark1 }
+
+constructor TacViewGotoBookmark1.Create(Owner: TComponent);
+begin
+  FBookmarkIndex := 1 ;
+  inherited;
+
+end;
+
+{ TacViewSetBookmark1 }
+
+constructor TacViewSetBookmark1.Create(Owner: TComponent);
+begin
+  FBookmarkIndex := 1 ;
+  inherited;
+
+end;
+
+
+{ TacViewSetBookmark2 }
+
+constructor TacViewSetBookmark2.Create(Owner: TComponent);
+begin
+  FBookmarkIndex := 2 ;
+  inherited;
+
+end;
+
+{ TacViewGotoBookmark2 }
+
+constructor TacViewGotoBookmark2.Create(Owner: TComponent);
+begin
+  FBookmarkIndex := 2 ;
+  inherited;
+
+end;
+
+{ TacViewSetBookmark3 }
+
+constructor TacViewSetBookmark3.Create(Owner: TComponent);
+begin
+  FBookmarkIndex := 3 ;
+  inherited;
+
+end;
+
+{ TacViewGotoBookmark3 }
+
+constructor TacViewGotoBookmark3.Create(Owner: TComponent);
+begin
+  FBookmarkIndex := 3 ;
+  inherited;
+
+end;
+
+{ TacViewSetBookmark4 }
+
+constructor TacViewSetBookmark4.Create(Owner: TComponent);
+begin
+  FBookmarkIndex := 4 ;
+  inherited;
+
+end;
+
+{ TacViewGotoBookmark4 }
+
+constructor TacViewGotoBookmark4.Create(Owner: TComponent);
+begin
+  FBookmarkIndex := 4;
+  inherited;
+ ;
+end;
+
+{ TacViewSetBookmark5 }
+
+constructor TacViewSetBookmark5.Create(Owner: TComponent);
+begin
+  FBookmarkIndex := 5 ;
+  inherited;
+end;
+
+{ TacViewGotoBookmark5 }
+
+constructor TacViewGotoBookmark5.Create(Owner: TComponent);
+begin
+  FBookmarkIndex := 5 ;
+  inherited;
+
+end;
+
+{ TacViewSetBookmark6 }
+
+constructor TacViewSetBookmark6.Create(Owner: TComponent);
+begin
+  FBookmarkIndex := 6 ;
+  inherited;
+end;
+
+{ TacViewGotoBookmark6 }
+
+constructor TacViewGotoBookmark6.Create(Owner: TComponent);
+begin
+  FBookmarkIndex := 6;
+  inherited;
+
+end;
+
+{ TacViewSetBookmark7 }
+
+constructor TacViewSetBookmark7.Create(Owner: TComponent);
+begin
+  FBookmarkIndex := 7 ;
+  inherited;
+end;
+
+{ TacViewGotoBookmark7 }
+
+constructor TacViewGotoBookmark7.Create(Owner: TComponent);
+begin
+  FBookmarkIndex := 7 ;
+  inherited;
+end;
+
+{ TacViewSetBookmark8 }
+
+constructor TacViewSetBookmark8.Create(Owner: TComponent);
+begin
+  FBookmarkIndex := 8 ;
+  inherited;
+end;
+
+{ TacViewGotoBookmark8 }
+
+constructor TacViewGotoBookmark8.Create(Owner: TComponent);
+begin
+  FBookmarkIndex := 8 ;
+  inherited;
+end;
+
+{ TacViewSetBookmark9 }
+
+constructor TacViewSetBookmark9.Create(Owner: TComponent);
+begin
+  FBookmarkIndex := 9 ;
+  inherited;
+end;
+
+{ TacViewGotoBookmark9 }
+
+constructor TacViewGotoBookmark9.Create(Owner: TComponent);
+begin
+  FBookmarkIndex := 9 ;
+  inherited;
+end;
+
+{ TacViewSetBookmark0 }
+
+constructor TacViewSetBookmark0.Create(Owner: TComponent);
+begin
+
+  FBookmarkIndex := 0 ;
+  inherited;
+end;
+
+{ TacViewGotoBookmark0 }
+
+constructor TacViewGotoBookmark0.Create(Owner: TComponent);
+begin
+  FBookmarkIndex :=  0;
+  inherited;
 end;
 
 end.
